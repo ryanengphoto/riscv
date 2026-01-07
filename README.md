@@ -1,1 +1,3 @@
 This repo holds the code for an independently developed RISC-V CPU core for the Basys3 Artix-7 FPGA development board.
+
+This CPU was made with Cursor experimentation.
