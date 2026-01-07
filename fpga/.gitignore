@@ -1,0 +1,51 @@
+# ===================================
+# Vivado Project Ignore
+# ===================================
+
+# Vivado project files
+*.xpr
+*.xise
+*.data
+*.hw
+*.hwx
+*.jou
+*.log
+*.str
+*.cache
+*.gen
+*.backup
+*.backup_files
+*.cache
+
+# Simulation / synthesis outputs
+*.runs/
+*.impl/
+*.synth/
+*.checkpoint
+*.sim/
+*.ip_user_files/
+*.ngc
+*.ngr
+*.lso
+*.bit
+*.bin
+*.dcp
+*.xml
+*.prj
+
+# IP and temporary files
+ip_repo/
+ip_user_files/
+webtalk/
+*.jou
+*.log
+*.xgui
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+
+# TCL auto-generated
+*.tcl~
