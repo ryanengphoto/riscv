@@ -154,18 +154,23 @@ module riscv_cpu(
         .immediate(immediate)
     );
 
-    // Register File
-    logic [31:0] wb_data; // Writeback data
+    // Register File (4 read ports: 2 for ID stage, 2 for EX stage)
+    logic [31:0] ex_rs1_data_current;
+    logic [31:0] ex_rs2_data_current;
     register_file u_reg_file (
         .clk(clk),
         .rst(rst),
         .we(mem_wb_reg_write),
-        .raddr1(rs1),
-        .raddr2(rs2),
+        .raddr1(rs1),              // ID stage read address 1
+        .raddr2(rs2),              // ID stage read address 2
+        .raddr3(id_ex_rs1),        // EX stage read address 1
+        .raddr4(id_ex_rs2),        // EX stage read address 2
         .waddr(mem_wb_rd),
         .wdata(wb_data),
-        .rdata1(rs1_data),
-        .rdata2(rs2_data)
+        .rdata1(rs1_data),         // ID stage read data 1
+        .rdata2(rs2_data),         // ID stage read data 2
+        .rdata3(ex_rs1_data_current), // EX stage read data 1
+        .rdata4(ex_rs2_data_current)  // EX stage read data 2
     );
 
     // =====================
@@ -214,6 +219,59 @@ module riscv_cpu(
     end
 
     // =====================
+    // Forwarding Unit (Data Hazard Handling)
+    // =====================
+    logic [31:0] rs1_data_forwarded;
+    logic [31:0] rs2_data_forwarded;
+    logic [1:0]  forward_rs1;
+    logic [1:0]  forward_rs2;
+    logic [31:0] wb_data; // Writeback data (needed for forwarding)
+    
+
+    // Calculate wb_data for forwarding (same as in WB stage)
+    assign wb_data = mem_wb_jump ? mem_wb_pc_plus_4 :
+                     (mem_wb_mem_to_reg ? mem_wb_mem_data : mem_wb_alu_result);
+
+    // Forwarding detection for rs1
+    always_comb begin
+        // Priority: EX/MEM > MEM/WB > Register File
+        if ((id_ex_rs1 != 5'b0) && (id_ex_rs1 == ex_mem_rd) && ex_mem_reg_write) begin
+            forward_rs1 = 2'b10; // Forward from EX/MEM
+        end else if ((id_ex_rs1 != 5'b0) && (id_ex_rs1 == mem_wb_rd) && mem_wb_reg_write) begin
+            forward_rs1 = 2'b01; // Forward from MEM/WB
+        end else begin
+            forward_rs1 = 2'b00; // Use register file
+        end
+    end
+
+    // Forwarding detection for rs2
+    always_comb begin
+        // Priority: EX/MEM > MEM/WB > Register File
+        if ((id_ex_rs2 != 5'b0) && (id_ex_rs2 == ex_mem_rd) && ex_mem_reg_write) begin
+            forward_rs2 = 2'b10; // Forward from EX/MEM
+        end else if ((id_ex_rs2 != 5'b0) && (id_ex_rs2 == mem_wb_rd) && mem_wb_reg_write) begin
+            forward_rs2 = 2'b01; // Forward from MEM/WB
+        end else begin
+            forward_rs2 = 2'b00; // Use register file
+        end
+    end
+
+    // Forwarding muxes
+    always_comb begin
+        case (forward_rs1)
+            2'b10: rs1_data_forwarded = ex_mem_alu_result;  // Forward from EX/MEM
+            2'b01: rs1_data_forwarded = wb_data;             // Forward from MEM/WB
+            default: rs1_data_forwarded = ex_rs1_data_current; // Use current register file value
+        endcase
+        
+        case (forward_rs2)
+            2'b10: rs2_data_forwarded = ex_mem_alu_result;  // Forward from EX/MEM
+            2'b01: rs2_data_forwarded = wb_data;             // Forward from MEM/WB
+            default: rs2_data_forwarded = ex_rs2_data_current; // Use current register file value
+        endcase
+    end
+
+    // =====================
     // Stage 3: Execute (EX)
     // =====================
     logic [31:0] alu_operand_a;
@@ -223,9 +281,9 @@ module riscv_cpu(
     logic        branch_taken;
     logic [31:0] jump_target;
 
-    // ALU operand selection
-    assign alu_operand_a = id_ex_alu_pc_src ? id_ex_pc : id_ex_rs1_data;
-    assign alu_operand_b = id_ex_alu_src ? id_ex_immediate : id_ex_rs2_data;
+    // ALU operand selection (with forwarding)
+    assign alu_operand_a = id_ex_alu_pc_src ? id_ex_pc : rs1_data_forwarded;
+    assign alu_operand_b = id_ex_alu_src ? id_ex_immediate : rs2_data_forwarded;
 
     // ALU
     alu_core u_alu (
@@ -269,7 +327,7 @@ module riscv_cpu(
         end else begin
             ex_mem_pc_plus_4   <= id_ex_pc_plus_4;
             ex_mem_alu_result  <= alu_result;
-            ex_mem_rs2_data    <= id_ex_rs2_data;
+            ex_mem_rs2_data    <= rs2_data_forwarded;  // Use forwarded value for stores
             ex_mem_rd          <= id_ex_rd;
             ex_mem_reg_write   <= id_ex_reg_write;
             ex_mem_mem_read    <= id_ex_mem_read;
@@ -315,8 +373,7 @@ module riscv_cpu(
     // Stage 5: Writeback (WB)
     // =====================
     // Writeback mux: JAL/JALR -> PC+4, Load -> memory data, else -> ALU result
-    assign wb_data = mem_wb_jump ? mem_wb_pc_plus_4 :
-                     (mem_wb_mem_to_reg ? mem_wb_mem_data : mem_wb_alu_result);
+    // (wb_data is already calculated in forwarding unit above)
 
 endmodule
 
