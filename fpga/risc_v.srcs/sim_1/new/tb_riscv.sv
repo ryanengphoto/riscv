@@ -71,6 +71,10 @@ module tb_riscv(
     );
 
     initial begin
+        // Dump VCD waveform file
+        $dumpfile("tb_riscv.vcd");
+        $dumpvars(0, tb_riscv);  // Dump all signals in testbench hierarchy
+        
         // Test reset
         clk = 1'b0;
         rst = 1'b1;

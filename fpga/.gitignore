@@ -16,6 +16,7 @@
 *.backup
 *.backup_files
 *.cache
+*.ila
 
 # Simulation / synthesis outputs
 *.runs/
@@ -32,6 +33,12 @@
 *.dcp
 *.xml
 *.prj
+*.vcd
+*.wdb
+*.mif
+*.txt
+*.pb
+xsim.dir/*
 
 # IP and temporary files
 ip_repo/
@@ -49,3 +56,10 @@ Thumbs.db
 
 # TCL auto-generated
 *.tcl~
+
+# Generated Scripts (moved to scripts/ directory)
+scripts/
+*.py
+
+# Simulation Scripts (moved to sim_scripts/ directory)
+sim_scripts/

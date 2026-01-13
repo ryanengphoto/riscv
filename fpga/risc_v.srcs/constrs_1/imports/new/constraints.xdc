@@ -163,3 +163,195 @@ set_property CONFIG_MODE SPIx4 [current_design]
 
 
 
+
+
+# ===================================
+# Preserve full dmem_addr signal for debugging
+# ===================================
+# Keep the full 32-bit dmem_addr signal from being optimized away
+# This allows probing both the full address and the sliced version [14:2]
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[*]}]
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/dmem_addr[*]}]
+
+# ===================================
+# Preserve data path signals for debugging dmem_wdata issue
+# ===================================
+# Keep ex_mem_rs2_data - this directly drives dmem_wdata
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data[*]}]
+
+# Keep id_ex_rs2_data - pipeline register that feeds ex_mem_rs2_data
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs2_data[*]}]
+
+# Keep rs2_data_forwarded - forwarding mux output that feeds ex_mem_rs2_data
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[*]}]
+
+# Keep rs1_data_forwarded - for completeness
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs1_data_forwarded[*]}]
+
+# Keep register file read outputs
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/u_reg_file/rdata2[*]}]
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/u_reg_file/rdata4[*]}]
+
+# Keep ex_rs2_data_current - register file output for EX stage
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[*]}]
+
+# Keep forwarding control signals
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/forward_rs2[*]}]
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/forward_rs1[*]}]
+
+# Keep wb_data - used in forwarding
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[*]}]
+
+# Keep dmem_wdata and dmem_rdata for debugging
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[*]}]
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/dmem_wdata[*]}]
+set_property KEEP true [get_nets {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[*]}]
+
+
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[1]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[2]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[5]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[6]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[18]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[21]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[26]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[29]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[30]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[0]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[8]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[9]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[11]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[14]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[15]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[24]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[31]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[3]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[7]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[12]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[16]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[22]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[27]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[4]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[10]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[13]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[17]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[19]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[20]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[23]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[25]}]
+set_property MARK_DEBUG true [get_nets {design_1_i/riscv_cpu_wrapper_0_dmem_addr[28]}]
+
+create_debug_core u_ila_0 ila
+set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
+set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
+set_property C_ADV_TRIGGER false [get_debug_cores u_ila_0]
+set_property C_DATA_DEPTH 1024 [get_debug_cores u_ila_0]
+set_property C_EN_STRG_QUAL false [get_debug_cores u_ila_0]
+set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
+set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
+set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
+set_property port_width 1 [get_debug_ports u_ila_0/clk]
+connect_debug_port u_ila_0/clk [get_nets [list design_1_i/clk_wiz_0/inst/clk_out1]]
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
+set_property port_width 32 [get_debug_ports u_ila_0/probe0]
+connect_debug_port u_ila_0/probe0 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[4]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[5]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[6]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[7]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[8]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[9]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[10]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[11]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[12]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[13]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[14]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[15]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[16]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[17]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[18]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[19]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[20]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[21]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[22]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[23]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[24]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[25]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[26]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[27]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[28]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[29]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[30]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/alu_result[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
+set_property port_width 5 [get_debug_ports u_ila_0/probe1]
+connect_debug_port u_ila_0/probe1 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rd[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rd[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rd[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rd[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rd[4]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
+set_property port_width 3 [get_debug_ports u_ila_0/probe2]
+connect_debug_port u_ila_0/probe2 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_funct3[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_funct3[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_funct3[2]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe3]
+set_property port_width 32 [get_debug_ports u_ila_0/probe3]
+connect_debug_port u_ila_0/probe3 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[4]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[5]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[6]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[7]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[8]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[9]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[10]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[11]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[12]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[13]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[14]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[15]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[16]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[17]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[18]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[19]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[20]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[21]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[22]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[23]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[24]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[25]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[26]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[27]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[28]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[29]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[30]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_immediate[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe4]
+set_property port_width 4 [get_debug_ports u_ila_0/probe4]
+connect_debug_port u_ila_0/probe4 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_alu_sel[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_alu_sel[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_alu_sel[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_alu_sel[3]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe5]
+set_property port_width 32 [get_debug_ports u_ila_0/probe5]
+connect_debug_port u_ila_0/probe5 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[4]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[5]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[6]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[7]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[8]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[9]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[10]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[11]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[12]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[13]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[14]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[15]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[16]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[17]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[18]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[19]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[20]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[21]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[22]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[23]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[24]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[25]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[26]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[27]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[28]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[29]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[30]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_rs2_data_reg[31]_0[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe6]
+set_property port_width 32 [get_debug_ports u_ila_0/probe6]
+connect_debug_port u_ila_0/probe6 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[4]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[5]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[6]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[7]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[8]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[9]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[10]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[11]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[12]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[13]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[14]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[15]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[16]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[17]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[18]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[19]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[20]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[21]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[22]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[23]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[24]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[25]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[26]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[27]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[28]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[29]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[30]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_rs2_data_current[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe7]
+set_property port_width 32 [get_debug_ports u_ila_0/probe7]
+connect_debug_port u_ila_0/probe7 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[0]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[1]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[2]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[3]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[4]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[5]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[6]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[7]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[8]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[9]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[10]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[11]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[12]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[13]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[14]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[15]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[16]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[17]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[18]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[19]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[20]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[21]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[22]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[23]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[24]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[25]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[26]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[27]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[28]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[29]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[30]} {design_1_i/riscv_cpu_wrapper_0/dmem_rdata[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe8]
+set_property port_width 32 [get_debug_ports u_ila_0/probe8]
+connect_debug_port u_ila_0/probe8 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[4]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[5]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[6]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[7]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[8]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[9]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[10]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[11]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[12]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[13]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[14]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[15]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[16]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[17]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[18]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[19]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[20]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[21]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[22]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[23]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[24]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[25]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[26]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[27]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[28]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[29]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[30]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/rs2_data_forwarded[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe9]
+set_property port_width 32 [get_debug_ports u_ila_0/probe9]
+connect_debug_port u_ila_0/probe9 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[4]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[5]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[6]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[7]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[8]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[9]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[10]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[11]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[12]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[13]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[14]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[15]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[16]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[17]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[18]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[19]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[20]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[21]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[22]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[23]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[24]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[25]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[26]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[27]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[28]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[29]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[30]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/wb_data[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe10]
+set_property port_width 32 [get_debug_ports u_ila_0/probe10]
+connect_debug_port u_ila_0/probe10 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[4]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[5]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[6]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[7]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[8]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[9]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[10]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[11]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[12]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[13]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[14]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[15]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[16]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[17]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[18]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[19]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[20]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[21]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[22]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[23]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[24]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[25]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[26]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[27]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[28]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[29]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[30]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_data[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe11]
+set_property port_width 32 [get_debug_ports u_ila_0/probe11]
+connect_debug_port u_ila_0/probe11 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[4]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[5]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[6]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[7]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[8]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[9]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[10]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[11]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[12]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[13]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[14]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[15]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[16]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[17]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[18]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[19]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[20]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[21]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[22]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[23]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[24]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[25]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[26]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[27]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[28]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[29]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[30]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1_data[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe12]
+set_property port_width 32 [get_debug_ports u_ila_0/probe12]
+connect_debug_port u_ila_0/probe12 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[4]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[5]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[6]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[7]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[8]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[9]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[10]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[11]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[12]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[13]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[14]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[15]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[16]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[17]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[18]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[19]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[20]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[21]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[22]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[23]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[24]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[25]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[26]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[27]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[28]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[29]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[30]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_alu_result[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe13]
+set_property port_width 32 [get_debug_ports u_ila_0/probe13]
+connect_debug_port u_ila_0/probe13 [get_nets [list {design_1_i/riscv_cpu_wrapper_0_dmem_addr[0]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[1]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[2]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[3]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[4]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[5]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[6]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[7]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[8]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[9]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[10]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[11]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[12]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[13]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[14]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[15]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[16]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[17]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[18]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[19]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[20]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[21]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[22]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[23]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[24]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[25]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[26]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[27]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[28]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[29]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[30]} {design_1_i/riscv_cpu_wrapper_0_dmem_addr[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe14]
+set_property port_width 5 [get_debug_ports u_ila_0/probe14]
+connect_debug_port u_ila_0/probe14 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs2[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs2[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs2[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs2[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs2[4]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe15]
+set_property port_width 32 [get_debug_ports u_ila_0/probe15]
+connect_debug_port u_ila_0/probe15 [get_nets [list {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[0]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[1]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[2]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[3]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[4]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[5]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[6]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[7]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[8]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[9]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[10]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[11]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[12]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[13]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[14]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[15]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[16]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[17]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[18]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[19]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[20]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[21]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[22]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[23]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[24]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[25]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[26]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[27]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[28]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[29]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[30]} {design_1_i/riscv_cpu_wrapper_0_dmem_wdata[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe16]
+set_property port_width 5 [get_debug_ports u_ila_0/probe16]
+connect_debug_port u_ila_0/probe16 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rd[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rd[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rd[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rd[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rd[4]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe17]
+set_property port_width 5 [get_debug_ports u_ila_0/probe17]
+connect_debug_port u_ila_0/probe17 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_rs1[4]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe18]
+set_property port_width 5 [get_debug_ports u_ila_0/probe18]
+connect_debug_port u_ila_0/probe18 [get_nets [list {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_rd[0]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_rd[1]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_rd[2]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_rd[3]} {design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_rd[4]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe19]
+set_property port_width 1 [get_debug_ports u_ila_0/probe19]
+connect_debug_port u_ila_0/probe19 [get_nets [list design_1_i/riscv_cpu_wrapper_0/dmem_read]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe20]
+set_property port_width 1 [get_debug_ports u_ila_0/probe20]
+connect_debug_port u_ila_0/probe20 [get_nets [list design_1_i/riscv_cpu_wrapper_0_dmem_write]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe21]
+set_property port_width 1 [get_debug_ports u_ila_0/probe21]
+connect_debug_port u_ila_0/probe21 [get_nets [list design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_mem_to_reg]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe22]
+set_property port_width 1 [get_debug_ports u_ila_0/probe22]
+connect_debug_port u_ila_0/probe22 [get_nets [list design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/mem_wb_reg_write]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe23]
+set_property port_width 1 [get_debug_ports u_ila_0/probe23]
+connect_debug_port u_ila_0/probe23 [get_nets [list design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/ex_mem_reg_write]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe24]
+set_property port_width 1 [get_debug_ports u_ila_0/probe24]
+connect_debug_port u_ila_0/probe24 [get_nets [list design_1_i/riscv_cpu_wrapper_0/inst/u_riscv_cpu/id_ex_reg_write]]
+set_property C_CLK_INPUT_FREQ_HZ 300000000 [get_debug_cores dbg_hub]
+set_property C_ENABLE_CLK_DIVIDER false [get_debug_cores dbg_hub]
+set_property C_USER_SCAN_CHAIN 1 [get_debug_cores dbg_hub]
+connect_debug_port dbg_hub/clk [get_nets u_ila_0_clk_out1]
