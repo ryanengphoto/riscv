@@ -78,6 +78,7 @@ module riscv_cpu(
     logic [31:0] pc_next;
     logic [31:0] pc_plus_4;
     logic        pc_src;  // PC source: 0=PC+4, 1=branch/jump target
+    logic        stall;  // stall signal from hazard detection unit
 
     assign pc_plus_4 = pc + 32'd4;
     assign imem_addr = pc;
@@ -86,7 +87,8 @@ module riscv_cpu(
     always_ff @(posedge clk or posedge rst) begin
         if (rst) begin
             pc <= 32'h00000000; // Start at address 0
-        end else begin
+        end 
+        else if (!stall) begin
             pc <= pc_next;
         end
     end
@@ -99,11 +101,12 @@ module riscv_cpu(
             if_id_pc           <= 32'b0;
             if_id_pc_plus_4   <= 32'b0;
             if_id_instruction  <= 32'b0;
-        end else begin
+        end else if (!stall) begin // Freeze IF/ID during stall
             if_id_pc           <= pc;
             if_id_pc_plus_4   <= pc_plus_4;
             if_id_instruction  <= imem_data;
         end
+        // When stall is active, IF/ID holds its current value
     end
 
     // =====================
@@ -177,7 +180,7 @@ module riscv_cpu(
     // ID/EX Pipeline Register
     // =====================
     always_ff @(posedge clk or posedge rst) begin
-        if (rst || pc_src) begin // Flush on branch/jump
+        if (rst || pc_src || stall) begin // Flush on branch/jump or stall
             id_ex_pc           <= 32'b0;
             id_ex_pc_plus_4    <= 32'b0;
             id_ex_rs1_data     <= 32'b0;
@@ -226,6 +229,10 @@ module riscv_cpu(
     logic [1:0]  forward_rs1;
     logic [1:0]  forward_rs2;
     logic [31:0] wb_data; // Writeback data (needed for forwarding)
+
+    assign stall = id_ex_mem_read && 
+               (id_ex_rd != 5'b0) &&              // x0 can't cause hazard
+               ((id_ex_rd == rs1) || (id_ex_rd == rs2));
     
 
     // Calculate wb_data for forwarding (same as in WB stage)
