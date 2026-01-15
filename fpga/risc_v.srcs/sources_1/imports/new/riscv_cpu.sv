@@ -97,13 +97,20 @@ module riscv_cpu(
     // IF/ID Pipeline Register
     // =====================
     always_ff @(posedge clk or posedge rst) begin
-        if (rst || pc_src) begin // Flush on branch/jump
+        if (rst) begin
+            // Asynchronous reset
             if_id_pc           <= 32'b0;
-            if_id_pc_plus_4   <= 32'b0;
+            if_id_pc_plus_4    <= 32'b0;
             if_id_instruction  <= 32'b0;
-        end else if (!stall) begin // Freeze IF/ID during stall
+        end else if (pc_src) begin
+            // Synchronous flush on branch/jump taken
+            if_id_pc           <= 32'b0;
+            if_id_pc_plus_4    <= 32'b0;
+            if_id_instruction  <= 32'b0;
+        end else if (!stall) begin
+            // Normal operation (freeze IF/ID during stall)
             if_id_pc           <= pc;
-            if_id_pc_plus_4   <= pc_plus_4;
+            if_id_pc_plus_4    <= pc_plus_4;
             if_id_instruction  <= imem_data;
         end
         // When stall is active, IF/ID holds its current value
@@ -265,7 +272,28 @@ module riscv_cpu(
     // ID/EX Pipeline Register
     // =====================
     always_ff @(posedge clk or posedge rst) begin
-        if (rst || pc_src || stall) begin // Flush on branch/jump or stall
+        if (rst) begin
+            // Asynchronous reset
+            id_ex_pc           <= 32'b0;
+            id_ex_pc_plus_4    <= 32'b0;
+            id_ex_rs1_data     <= 32'b0;
+            id_ex_rs2_data     <= 32'b0;
+            id_ex_immediate    <= 32'b0;
+            id_ex_rd           <= 5'b0;
+            id_ex_rs1          <= 5'b0;
+            id_ex_rs2          <= 5'b0;
+            id_ex_alu_sel      <= 5'b0;
+            id_ex_alu_src      <= 1'b0;
+            id_ex_alu_pc_src   <= 1'b0;
+            id_ex_reg_write    <= 1'b0;
+            id_ex_mem_read     <= 1'b0;
+            id_ex_mem_write    <= 1'b0;
+            id_ex_mem_to_reg   <= 1'b0;
+            id_ex_branch       <= 1'b0;
+            id_ex_jump         <= 1'b0;
+            id_ex_funct3       <= 3'b0;
+        end else if (pc_src || stall) begin
+            // Synchronous flush on branch/jump taken, or insert bubble on stall
             id_ex_pc           <= 32'b0;
             id_ex_pc_plus_4    <= 32'b0;
             id_ex_rs1_data     <= 32'b0;
@@ -285,6 +313,7 @@ module riscv_cpu(
             id_ex_jump         <= 1'b0;
             id_ex_funct3       <= 3'b0;
         end else begin
+            // Normal operation
             id_ex_pc           <= if_id_pc;
             id_ex_pc_plus_4    <= if_id_pc_plus_4;
             id_ex_rs1_data     <= rs1_data;
