@@ -39,7 +39,7 @@ module riscv_cpu(
     logic [4:0]  id_ex_rd;
     logic [4:0]  id_ex_rs1;
     logic [4:0]  id_ex_rs2;
-    logic [3:0]  id_ex_alu_sel;
+    logic [4:0]  id_ex_alu_sel;
     logic        id_ex_alu_src;
     logic        id_ex_alu_pc_src;
     logic        id_ex_reg_write;
@@ -115,7 +115,7 @@ module riscv_cpu(
     logic [31:0] rs1_data;
     logic [31:0] rs2_data;
     logic [31:0] immediate;
-    logic [3:0]  alu_sel;
+    logic [4:0]  alu_sel;
     logic        alu_src;
     logic        alu_pc_src;
     logic        reg_write;
@@ -189,7 +189,7 @@ module riscv_cpu(
             id_ex_rd           <= 5'b0;
             id_ex_rs1          <= 5'b0;
             id_ex_rs2          <= 5'b0;
-            id_ex_alu_sel      <= 4'b0;
+            id_ex_alu_sel      <= 5'b0;
             id_ex_alu_src      <= 1'b0;
             id_ex_alu_pc_src   <= 1'b0;
             id_ex_reg_write    <= 1'b0;
@@ -309,7 +309,7 @@ module riscv_cpu(
 
     // Branch/Jump target calculation
     assign branch_target = id_ex_pc + id_ex_immediate;
-    assign jump_target   = (id_ex_jump && (id_ex_alu_sel == 4'b0010)) ? 
+    assign jump_target   = (id_ex_jump && (id_ex_alu_sel == 5'b00010)) ? // JALR uses ALU_ADD (0x02)
                            (id_ex_rs1_data + id_ex_immediate) : branch_target;
 
     // PC source selection
