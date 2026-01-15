@@ -205,20 +205,13 @@ module control_unit(
             end
 
             // Branch instructions (BEQ, BNE, BLT, BGE, BLTU, BGEU)
+            // Branch comparison is done in ID stage by branch_comparator module
+            // ALU is not used for branches anymore (reduces critical path)
             7'b1100011: begin
                 branch    = 1'b1;
-                alu_src   = 1'b0;  // compare registers
-                imm_sel   = 3'b010; // B-type immediate
-                
-                case (funct3)
-                    3'b000: alu_sel = ALU_SUB;  // BEQ (use SUB, check zero)
-                    3'b001: alu_sel = ALU_SUB;  // BNE (use SUB, check not zero)
-                    3'b100: alu_sel = ALU_SLT;  // BLT (signed)
-                    3'b101: alu_sel = ALU_SLT;  // BGE (signed, inverted)
-                    3'b110: alu_sel = ALU_SLTU; // BLTU (unsigned)
-                    3'b111: alu_sel = ALU_SLTU; // BGEU (unsigned, inverted)
-                    default: alu_sel = ALU_NOP;
-                endcase
+                alu_src   = 1'b0;     // not used for branches
+                alu_sel   = ALU_NOP;  // ALU not needed - branch_comparator handles comparison
+                imm_sel   = 3'b010;   // B-type immediate (still needed for target calculation)
             end
 
             // JAL (Jump and Link)
