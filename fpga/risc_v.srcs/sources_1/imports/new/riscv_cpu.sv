@@ -267,6 +267,11 @@ module riscv_cpu(
     
     // PC source selection (now in ID stage)
     assign id_pc_src = (branch && id_branch_taken) || jump;
+    
+    // Branch flush signal - only for conditional branches, NOT jumps
+    // Jumps (JAL/JALR) need to propagate through pipeline to write return address
+    logic branch_flush;
+    assign branch_flush = branch && id_branch_taken;
 
     // =====================
     // ID/EX Pipeline Register
@@ -292,8 +297,9 @@ module riscv_cpu(
             id_ex_branch       <= 1'b0;
             id_ex_jump         <= 1'b0;
             id_ex_funct3       <= 3'b0;
-        end else if (pc_src || stall) begin
-            // Synchronous flush on branch/jump taken, or insert bubble on stall
+        end else if (branch_flush || stall) begin
+            // Synchronous flush on BRANCH taken (not jump!), or insert bubble on stall
+            // Note: Jumps must NOT be flushed - they need to reach WB to write return address
             id_ex_pc           <= 32'b0;
             id_ex_pc_plus_4    <= 32'b0;
             id_ex_rs1_data     <= 32'b0;
