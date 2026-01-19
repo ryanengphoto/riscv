@@ -1,0 +1,27 @@
+# OpenLane outputs
+runs/
+openlane/
+.openlane/
+
+# Simulation outputs
+*.vvp
+*.vcd
+*.fst
+*.lxt
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+
+# Editor files
+*~
+*.swp
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+

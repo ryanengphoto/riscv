@@ -1,0 +1,84 @@
+{
+    "//": "OpenLane 2.0 Configuration for RISC-V CPU",
+    
+    "DESIGN_NAME": "riscv_cpu",
+    "DESIGN_IS_CORE": true,
+    
+    "//": "Source files",
+    "VERILOG_FILES": [
+        "dir::src/alu_core.sv",
+        "dir::src/control_unit.sv",
+        "dir::src/immediate_generator.sv",
+        "dir::src/branch_comparator.sv",
+        "dir::src/register_file.sv",
+        "dir::src/riscv_cpu.sv"
+    ],
+    "VERILOG_INCLUDE_DIRS": ["dir::src"],
+    
+    "//": "Clock configuration (50 MHz target)",
+    "CLOCK_PORT": "clk",
+    "CLOCK_PERIOD": 20.0,
+    "CLOCK_NET": "clk",
+    
+    "//": "Timing constraints",
+    "BASE_SDC_FILE": "dir::constraint.sdc",
+    
+    "//": "Die and core area",
+    "FP_SIZING": "absolute",
+    "DIE_AREA": "0 0 500 500",
+    "FP_CORE_UTIL": 40,
+    "PL_TARGET_DENSITY": 0.45,
+    
+    "//": "Pin configuration",
+    "FP_PIN_ORDER_CFG": "dir::pin_order.cfg",
+    
+    "//": "Synthesis settings",
+    "SYNTH_STRATEGY": "AREA 0",
+    "SYNTH_READ_BLACKBOX_LIB": true,
+    "SYNTH_NO_FLAT": false,
+    
+    "//": "Placement settings",
+    "PL_BASIC_PLACEMENT": false,
+    "PL_SKIP_INITIAL_PLACEMENT": false,
+    "PL_RANDOM_GLB_PLACEMENT": false,
+    "PL_RANDOM_INITIAL_PLACEMENT": false,
+    
+    "//": "Routing settings",
+    "GRT_ALLOW_CONGESTION": false,
+    "RT_MAX_LAYER": "met4",
+    "GRT_ADJUSTMENT": 0.3,
+    
+    "//": "DRC/LVS settings",
+    "RUN_DRC": true,
+    "RUN_LVS": true,
+    "RUN_MAGIC_DRC": true,
+    
+    "//": "Power settings",
+    "FP_PDN_CORE_RING": true,
+    "FP_PDN_ENABLE_RAILS": true,
+    
+    "//": "Antenna settings",
+    "RUN_ANTENNA_REPAIR": true,
+    "GRT_ANTENNA_MARGIN": 10,
+    
+    "//": "PDK-specific overrides",
+    "pdk::sky130*": {
+        "MAX_FANOUT_CONSTRAINT": 6,
+        "CTS_CLK_BUFFER_LIST": ["sky130_fd_sc_hd__clkbuf_4", "sky130_fd_sc_hd__clkbuf_8"],
+        "CTS_SINK_CLUSTERING_SIZE": 16,
+        "CTS_SINK_CLUSTERING_MAX_DIAMETER": 50,
+        "CLOCK_PERIOD": 20.0,
+        "FP_CORE_UTIL": 40,
+        "SYNTH_MAX_FANOUT": 6,
+        "scl::sky130_fd_sc_hd": {
+            "SYNTH_STRATEGY": "AREA 2"
+        }
+    },
+    
+    "pdk::gf180*": {
+        "CLOCK_PERIOD": 25.0,
+        "FP_CORE_UTIL": 35
+    }
+}
+
+
