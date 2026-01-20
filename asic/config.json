@@ -17,7 +17,7 @@
     
     "//": "Clock configuration (50 MHz target)",
     "CLOCK_PORT": "clk",
-    "CLOCK_PERIOD": 20.0,
+    "CLOCK_PERIOD": 25.0,
     "CLOCK_NET": "clk",
     
     "//": "Timing constraints",
@@ -25,15 +25,15 @@
     
     "//": "Die and core area",
     "FP_SIZING": "absolute",
-    "DIE_AREA": "0 0 500 500",
+    "DIE_AREA": "0 0 850 850",
     "FP_CORE_UTIL": 40,
-    "PL_TARGET_DENSITY": 0.45,
+    "PL_TARGET_DENSITY": 0.40,
     
     "//": "Pin configuration",
     "FP_PIN_ORDER_CFG": "dir::pin_order.cfg",
     
     "//": "Synthesis settings",
-    "SYNTH_STRATEGY": "AREA 0",
+    "SYNTH_STRATEGY": "DELAY 4",
     "SYNTH_READ_BLACKBOX_LIB": true,
     "SYNTH_NO_FLAT": false,
     
@@ -45,7 +45,7 @@
     
     "//": "Routing settings",
     "GRT_ALLOW_CONGESTION": false,
-    "RT_MAX_LAYER": "met4",
+    "RT_MAX_LAYER": "met5",
     "GRT_ADJUSTMENT": 0.3,
     
     "//": "DRC/LVS settings",
@@ -59,7 +59,7 @@
     
     "//": "Antenna settings",
     "RUN_ANTENNA_REPAIR": true,
-    "GRT_ANTENNA_MARGIN": 10,
+    "GRT_ANTENNA_MARGIN": 5,
     
     "//": "PDK-specific overrides",
     "pdk::sky130*": {
@@ -67,11 +67,11 @@
         "CTS_CLK_BUFFER_LIST": ["sky130_fd_sc_hd__clkbuf_4", "sky130_fd_sc_hd__clkbuf_8"],
         "CTS_SINK_CLUSTERING_SIZE": 16,
         "CTS_SINK_CLUSTERING_MAX_DIAMETER": 50,
-        "CLOCK_PERIOD": 20.0,
+        "CLOCK_PERIOD": 25.0,
         "FP_CORE_UTIL": 40,
         "SYNTH_MAX_FANOUT": 6,
         "scl::sky130_fd_sc_hd": {
-            "SYNTH_STRATEGY": "AREA 2"
+            "SYNTH_STRATEGY": "DELAY 4"
         }
     },
     

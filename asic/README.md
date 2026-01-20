@@ -18,7 +18,8 @@ asic/
 │   ├── tb_riscv.sv        # Main testbench
 │   ├── common_tasks.svh   # Shared test utilities
 │   └── tests/             # Individual test files
-├── config.json            # OpenLane configuration
+├── config.tcl             # OpenLane 1.x configuration
+├── config.json            # OpenLane 2.x configuration
 ├── constraint.sdc         # Timing constraints (SDC)
 ├── pin_order.cfg          # Pin placement configuration
 ├── Makefile               # Build automation
@@ -42,9 +43,14 @@ docker pull efabless/openlane:latest
 ```bash
 # Using volare (recommended)
 pip install volare
+
+# For OpenLane 1.x (Docker), use this specific version:
+volare enable --pdk sky130 bdc9412b3e468c102d01b7cf6337be06ec6e9c9a --pdk-root ~/.volare
+
+# For OpenLane 2.x, use latest:
 volare enable --pdk sky130 --pdk-root ~/.volare
 
-# Set environment variable
+# Set environment variables
 export PDK_ROOT=~/.volare
 export PDK=sky130A
 ```
@@ -67,11 +73,61 @@ make interactive
 make clean
 ```
 
-### Running with Docker
+### Running with Docker (OpenLane 1.x)
 
 ```bash
-# Using the provided docker script
-make docker-harden
+# First, install the PDK using volare
+pip install volare
+volare enable --pdk sky130 bdc9412b3e468c102d01b7cf6337be06ec6e9c9a --pdk-root ~/.volare
+
+# Run the full RTL-to-GDSII flow
+cd ~/riscv/asic
+sudo docker run --rm \
+    -v $(pwd):/openlane/designs/riscv_cpu \
+    -v ~/.volare:/home/root/.volare \
+    -e PDK_ROOT=/home/root/.volare \
+    -e PDK=sky130A \
+    efabless/openlane:latest \
+    bash -c "flow.tcl -design /openlane/designs/riscv_cpu -tag run1"
+
+# To overwrite an existing run
+sudo docker run --rm \
+    -v $(pwd):/openlane/designs/riscv_cpu \
+    -v ~/.volare:/home/root/.volare \
+    -e PDK_ROOT=/home/root/.volare \
+    -e PDK=sky130A \
+    efabless/openlane:latest \
+    bash -c "flow.tcl -design /openlane/designs/riscv_cpu -tag run1 -overwrite"
+
+# To open the gui
+sudo docker run --rm -it     -e DISPLAY=$DISPLAY     -v /tmp/.X11-unix:/tmp/.X11-unix     -v /home/rye20/riscv/asic:/work     -v ~/.volare:/home/root/.volare     -w /work     efabless/openlane:latest     openroad -gui
+
+# Clean up root-owned run files
+sudo rm -rf runs/
+
+```
+
+**Note:** Docker runs as root, so files in `runs/` will be owned by root. Use `sudo` to delete them or run `sudo chown -R $(whoami) runs/` to take ownership.
+
+### Running with LibreLane (Nix)
+
+LibreLane is the next-generation OpenLane infrastructure. Requires Nix installation.
+
+```bash
+# Enter nix-shell (from librelane repo)
+nix-shell ~/librelane/shell.nix
+
+# Run synthesis only
+librelane --flow Classic --to Yosys.Synthesis ./config.json
+
+# Run synthesis + STA for PPA metrics (Power, Performance, Area)
+librelane --flow Classic --to OpenROAD.STAPrePNR ./config.json
+
+# Run full RTL-to-GDSII flow
+librelane --flow Classic ./config.json
+
+# View metrics after run
+cat runs/<RUN_TAG>/final/metrics.json
 ```
 
 ### Simulation (pre-synthesis verification)
@@ -90,8 +146,9 @@ make waves
 |-----------|-------|-------------|
 | Target Clock | 50 MHz | 20ns period |
 | PDK | sky130A | SkyWater 130nm |
-| Core Utilization | 40% | Target density |
-| Die Area | 500x500 µm | Approximate |
+| Target Density | 40% | PL_TARGET_DENSITY |
+| Die Area | 850x850 µm | Configurable in config.tcl/json |
+| Max Routing Layer | met5 | RT_MAX_LAYER |
 
 ## Flow Stages
 
@@ -161,6 +218,11 @@ Edit `pin_order.cfg` to control I/O pin locations.
 3. **Routing congestion**
    - Decrease `FP_CORE_UTIL`
    - Increase die area
+
+4. **Placement density error (GPL-0302)**
+   - Error: "Use a higher -density or re-floorplan with a larger core area"
+   - Increase `PL_TARGET_DENSITY` in config.tcl (e.g., from 0.45 to 0.56)
+   - Or increase `DIE_AREA` (e.g., from "0 0 500 500" to "0 0 550 550")
 
 ### Getting Help
 

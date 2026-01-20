@@ -5,13 +5,13 @@
 # -----------------------------------------------------------------------------
 # Clock Definition
 # -----------------------------------------------------------------------------
-# Target: 50 MHz (20ns period)
+# Target: 100 MHz (10ns period)
 # Adjust CLOCK_PERIOD for different targets:
 #   100 MHz = 10.0ns
 #   50 MHz  = 20.0ns
 #   25 MHz  = 40.0ns
 
-create_clock -name clk -period 20.0 [get_ports clk]
+create_clock -name clk -period 25.0 [get_ports clk]
 
 # Clock uncertainty (jitter + skew margin)
 set_clock_uncertainty 0.25 [get_clocks clk]
