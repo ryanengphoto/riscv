@@ -268,12 +268,15 @@ module riscv_cpu(
     assign id_jump_target = is_jalr ? (id_rs1_forwarded + immediate) : id_branch_target;
     
     // PC source selection (now in ID stage)
-    assign id_pc_src = (branch && id_branch_taken) || jump;
+    // IMPORTANT: Don't take branch/jump during stall - operands may not be ready
+    // The stall ensures we wait until correct values are available
+    assign id_pc_src = !stall && ((branch && id_branch_taken) || jump);
     
     // Branch flush signal - only for conditional branches, NOT jumps
     // Jumps (JAL/JALR) need to propagate through pipeline to write return address
+    // IMPORTANT: Don't flush during stall - wait for correct branch decision
     logic branch_flush;
-    assign branch_flush = branch && id_branch_taken;
+    assign branch_flush = !stall && branch && id_branch_taken;
 
     // =====================
     // ID/EX Pipeline Register

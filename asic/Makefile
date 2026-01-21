@@ -105,6 +105,29 @@ waves: sim
 	@echo "Opening waveform viewer..."
 	gtkwave $(SIM_TOP).vcd &
 
+# ChaCha20 full block test (larger memory)
+sim-chacha20: tb_chacha20.vvp
+	@echo "Running ChaCha20 full block simulation..."
+	vvp tb_chacha20.vvp
+
+tb_chacha20.vvp: $(SIM_SRCS) sim/tb_chacha20.sv
+	@echo "Compiling ChaCha20 testbench..."
+	iverilog -g2012 -o $@ \
+		-I src \
+		-I sim \
+		-s tb_chacha20 \
+		src/alu_core.sv \
+		src/control_unit.sv \
+		src/immediate_generator.sv \
+		src/branch_comparator.sv \
+		src/register_file.sv \
+		src/riscv_cpu.sv \
+		sim/tb_chacha20.sv
+
+waves-chacha20: sim-chacha20
+	@echo "Opening ChaCha20 waveform viewer..."
+	gtkwave tb_chacha20.vcd &
+
 # =============================================================================
 # Reports
 # =============================================================================
