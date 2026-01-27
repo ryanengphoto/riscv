@@ -356,7 +356,7 @@ module tb_chacha20();
         instruction_mem[216] = 32'h07D02E23;  // sw      t4, 0x7C(x0)
         // Store round counter and integrity check
         instruction_mem[217] = 32'h20502023;  // sw      t0, 0x200(x0)
-        instruction_mem[218] = 32'h60241F13;  // cpop    t5, s0
+        instruction_mem[218] = 32'h60241F13;  // cpop    t5, s0 (I-type, correct RISC-V Zbb spec)
         instruction_mem[219] = 32'h21E02223;  // sw      t5, 0x204(x0)
         // Halt (infinite loop)
         instruction_mem[220] = 32'h00000013;  // nop

@@ -136,9 +136,9 @@ module control_unit(
                     3'b001: begin
                         case (funct7)
                             7'b0000000: alu_sel = ALU_SLL;  // SLLI
-                            // Zbb unary ops (use rs2 field to distinguish)
+                            // Zbb unary ops (use shamt field to distinguish)
                             7'b0110000: begin
-                                case (instruction[24:20])  // rs2 field
+                                case (instruction[24:20])  // shamt field (bits 24-20)
                                     5'b00000: alu_sel = ALU_CLZ;   // CLZ
                                     5'b00001: alu_sel = ALU_CTZ;   // CTZ
                                     5'b00010: alu_sel = ALU_CPOP;  // CPOP

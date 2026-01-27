@@ -140,6 +140,11 @@ make sim
 make waves
 ```
 
+### CVC Simulation
+```bash
+docker run --rm amura/open-src-cvc show-cvc_cmd > cvc
+```
+
 ## Design Parameters
 
 | Parameter | Value | Description |
