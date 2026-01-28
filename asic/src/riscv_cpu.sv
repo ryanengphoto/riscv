@@ -166,23 +166,17 @@ module riscv_cpu(
         .immediate(immediate)
     );
 
-    // Register File (4 read ports: 2 for ID stage, 2 for EX stage)
-    logic [31:0] ex_rs1_data_current;
-    logic [31:0] ex_rs2_data_current;
+    // Register File (2 read ports for ID stage, 1 write port)
     register_file u_reg_file (
         .clk(clk),
         .rst(rst),
         .we(mem_wb_reg_write),
         .raddr1(rs1),              // ID stage read address 1
         .raddr2(rs2),              // ID stage read address 2
-        .raddr3(id_ex_rs1),        // EX stage read address 1
-        .raddr4(id_ex_rs2),        // EX stage read address 2
         .waddr(mem_wb_rd),
         .wdata(wb_data),
         .rdata1(rs1_data),         // ID stage read data 1
-        .rdata2(rs2_data),         // ID stage read data 2
-        .rdata3(ex_rs1_data_current), // EX stage read data 1
-        .rdata4(ex_rs2_data_current)  // EX stage read data 2
+        .rdata2(rs2_data)          // ID stage read data 2
     );
 
     // =====================
@@ -281,6 +275,24 @@ module riscv_cpu(
     // =====================
     // ID/EX Pipeline Register
     // =====================
+    // WB bypass for ID-stage operand capture:
+    // If WB writes the same register ID is reading on this clock edge, the raw regfile read
+    // may still reflect the old value at the sampling edge. Bypass `wb_data` into ID/EX.
+    logic [31:0] id_rs1_data_wb_byp;
+    logic [31:0] id_rs2_data_wb_byp;
+
+    always_comb begin
+        id_rs1_data_wb_byp = rs1_data;
+        id_rs2_data_wb_byp = rs2_data;
+
+        if (mem_wb_reg_write && (mem_wb_rd != 5'b0) && (mem_wb_rd == rs1)) begin
+            id_rs1_data_wb_byp = wb_data;
+        end
+        if (mem_wb_reg_write && (mem_wb_rd != 5'b0) && (mem_wb_rd == rs2)) begin
+            id_rs2_data_wb_byp = wb_data;
+        end
+    end
+
     always_ff @(posedge clk or posedge rst) begin
         if (rst) begin
             // Asynchronous reset
@@ -327,8 +339,8 @@ module riscv_cpu(
             // Normal operation
             id_ex_pc           <= if_id_pc;
             id_ex_pc_plus_4    <= if_id_pc_plus_4;
-            id_ex_rs1_data     <= rs1_data;
-            id_ex_rs2_data     <= rs2_data;
+            id_ex_rs1_data     <= id_rs1_data_wb_byp;
+            id_ex_rs2_data     <= id_rs2_data_wb_byp;
             id_ex_immediate    <= immediate;
             id_ex_rd           <= rd;
             id_ex_rs1          <= rs1;
@@ -424,13 +436,16 @@ module riscv_cpu(
         case (forward_rs1)
             2'b10: rs1_data_forwarded = ex_mem_alu_result;  // Forward from EX/MEM
             2'b01: rs1_data_forwarded = wb_data;             // Forward from MEM/WB
-            default: rs1_data_forwarded = ex_rs1_data_current; // Use current register file value
+            // Default should use the *pipeline-registered* operand from ID/EX.
+            // Using the EX-stage regfile read (`ex_rs1_data_current`) creates a long path:
+            // id_ex_rs1[*] (address) -> regfile mux -> forwarding mux -> ALU -> EX/MEM flop.
+            default: rs1_data_forwarded = id_ex_rs1_data;
         endcase
         
         case (forward_rs2)
             2'b10: rs2_data_forwarded = ex_mem_alu_result;  // Forward from EX/MEM
             2'b01: rs2_data_forwarded = wb_data;             // Forward from MEM/WB
-            default: rs2_data_forwarded = ex_rs2_data_current; // Use current register file value
+            default: rs2_data_forwarded = id_ex_rs2_data;
         endcase
     end
 

@@ -16,14 +16,10 @@ module register_file(
     input  logic        we,              // write enable
     input  logic [4:0]  raddr1,          // read address 1 (ID stage)
     input  logic [4:0]  raddr2,          // read address 2 (ID stage)
-    input  logic [4:0]  raddr3,          // read address 3 (EX stage)
-    input  logic [4:0]  raddr4,          // read address 4 (EX stage)
     input  logic [4:0]  waddr,           // write address
     input  logic [31:0] wdata,           // write data
     output logic [31:0] rdata1,          // read data 1 (ID stage)
-    output logic [31:0] rdata2,          // read data 2 (ID stage)
-    output logic [31:0] rdata3,          // read data 3 (EX stage)
-    output logic [31:0] rdata4           // read data 4 (EX stage)
+    output logic [31:0] rdata2           // read data 2 (ID stage)
 );
 
     // Register file: 32 registers of 32 bits each
@@ -35,8 +31,6 @@ module register_file(
     always_comb begin
         rdata1 = (raddr1 == 5'b0) ? 32'b0 : registers[raddr1];
         rdata2 = (raddr2 == 5'b0) ? 32'b0 : registers[raddr2];
-        rdata3 = (raddr3 == 5'b0) ? 32'b0 : registers[raddr3];
-        rdata4 = (raddr4 == 5'b0) ? 32'b0 : registers[raddr4];
     end
 
     // =====================
