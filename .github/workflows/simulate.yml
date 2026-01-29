@@ -1,0 +1,80 @@
+name: RISC-V CPU Simulation
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  simulate:
+    name: Run RISC-V CPU Simulation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install Icarus Verilog
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y iverilog
+        
+    - name: Verify Icarus Verilog installation
+      run: |
+        iverilog -v
+        vvp -v
+        
+    - name: Run simulation
+      working-directory: asic
+      id: sim_run
+      run: |
+        # Run simulation and capture output
+        make sim 2>&1 | tee sim_output.log
+        SIM_EXIT_CODE=${PIPESTATUS[0]}
+        echo "exit_code=$SIM_EXIT_CODE" >> $GITHUB_OUTPUT
+        
+        # Check for test pass indicator
+        if grep -q "TEST PASSED" sim_output.log; then
+          echo "status=passed" >> $GITHUB_OUTPUT
+        elif grep -q "TEST FAILED\|Failed:\|ERROR" sim_output.log; then
+          echo "status=failed" >> $GITHUB_OUTPUT
+        else
+          echo "status=unknown" >> $GITHUB_OUTPUT
+        fi
+        
+        # Display last 50 lines of output
+        echo "=== Simulation Output (last 50 lines) ==="
+        tail -50 sim_output.log
+        
+        # Exit with simulation exit code
+        exit $SIM_EXIT_CODE
+        
+    - name: Check simulation results
+      working-directory: asic
+      if: always()
+      run: |
+        echo "Simulation status: ${{ steps.sim_run.outputs.status }}"
+        echo "Simulation exit code: ${{ steps.sim_run.outputs.exit_code }}"
+        
+        # Check if simulation artifacts were created
+        echo "Simulation artifacts:"
+        ls -la *.vvp *.vcd *.log 2>/dev/null || echo "No artifacts found"
+        
+        # Fail if simulation didn't pass
+        if [ "${{ steps.sim_run.outputs.status }}" != "passed" ]; then
+          echo "❌ Simulation did not pass!"
+          exit 1
+        fi
+        
+    - name: Upload simulation artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: simulation-artifacts
+        path: |
+          asic/*.vvp
+          asic/*.vcd
+        retention-days: 7
+
