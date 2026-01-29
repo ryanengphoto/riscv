@@ -23,8 +23,10 @@ jobs:
         
     - name: Verify Icarus Verilog installation
       run: |
-        iverilog -v
-        vvp -v
+        which iverilog
+        which vvp
+        iverilog -V || true  # Show version (capital V), ignore exit code
+        echo "Icarus Verilog installed successfully"
         
     - name: Run simulation
       working-directory: asic
