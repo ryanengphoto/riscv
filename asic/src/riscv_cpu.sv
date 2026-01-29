@@ -2,7 +2,7 @@
 Author: Ryan Eng
 
 RISC-V 6-Stage Pipeline CPU
-Stages: IF (Instruction Fetch), ID1/ID2 (Decode), ID/EX (Execute), EX/MEM (Memory), MEM/WB (Writeback)
+Stages: IF (Instruction Fetch), ID1/ID2 (Decode), ID2/EX (Execute), EX/MEM (Memory), MEM/WB (Writeback)
 
 ASIC Version - Ran with LibreLane
 */
@@ -27,51 +27,10 @@ module riscv_cpu(
     // Pipeline Registers
     // =====================
     
-    // IF/ID Pipeline Register
-    logic [31:0] if_id_pc;
-    logic [31:0] if_id_pc_plus_4;
-    logic [31:0] if_id_instruction;
-
-    // ID/EX Pipeline Register
-    logic [31:0] id_ex_pc;
-    logic [31:0] id_ex_pc_plus_4;
-    logic [31:0] id_ex_rs1_data;
-    logic [31:0] id_ex_rs2_data;
-    logic [31:0] id_ex_immediate;
-    logic [4:0]  id_ex_rd;
-    logic [4:0]  id_ex_rs1;
-    logic [4:0]  id_ex_rs2;
-    logic [4:0]  id_ex_alu_sel;
-    logic        id_ex_alu_src;
-    logic        id_ex_alu_pc_src;
-    logic        id_ex_reg_write;
-    logic        id_ex_mem_read;
-    logic        id_ex_mem_write;
-    logic        id_ex_mem_to_reg;
-    logic        id_ex_branch;
-    logic        id_ex_jump;
-    logic [2:0]  id_ex_funct3;
-
-    // EX/MEM Pipeline Register
-    logic [31:0] ex_mem_pc_plus_4;
-    logic [31:0] ex_mem_alu_result;
-    logic [31:0] ex_mem_rs2_data;
-    logic [4:0]  ex_mem_rd;
-    logic        ex_mem_reg_write;
-    logic        ex_mem_mem_read;
-    logic        ex_mem_mem_write;
-    logic        ex_mem_mem_to_reg;
-    logic        ex_mem_jump;
-    logic [2:0]  ex_mem_funct3;
-
-    // MEM/WB Pipeline Register
-    logic [31:0] mem_wb_pc_plus_4;
-    logic [31:0] mem_wb_alu_result;
-    logic [31:0] mem_wb_mem_data;
-    logic [4:0]  mem_wb_rd;
-    logic        mem_wb_reg_write;
-    logic        mem_wb_mem_to_reg;
-    logic        mem_wb_jump;
+    // IF/ID1 Pipeline Register
+    logic [31:0] if_id1_pc;
+    logic [31:0] if_id1_pc_plus_4;
+    logic [31:0] if_id1_instruction;
 
     // ID1/ID2 Pipeline Register
     logic [31:0] id1_id2_pc;
@@ -95,6 +54,49 @@ module riscv_cpu(
     logic        id1_id2_is_jalr;
     logic [31:0] id1_id2_instruction;
 
+    // ID2/EX Pipeline Register
+    logic [31:0] id2_ex_pc;
+    logic [31:0] id2_ex_pc_plus_4;
+    logic [31:0] id2_ex_rs1_data;
+    logic [31:0] id2_ex_rs2_data;
+    logic [31:0] id2_ex_immediate;
+    logic [4:0]  id2_ex_rd;
+    logic [4:0]  id2_ex_rs1;
+    logic [4:0]  id2_ex_rs2;
+    logic [4:0]  id2_ex_alu_sel;
+    logic        id2_ex_alu_src;
+    logic        id2_ex_alu_pc_src;
+    logic        id2_ex_reg_write;
+    logic        id2_ex_mem_read;
+    logic        id2_ex_mem_write;
+    logic        id2_ex_mem_to_reg;
+    logic        id2_ex_branch;
+    logic        id2_ex_jump;
+    logic [2:0]  id2_ex_funct3;
+
+    // EX/MEM Pipeline Register
+    logic [31:0] ex_mem_pc_plus_4;
+    logic [31:0] ex_mem_alu_result;
+    logic [31:0] ex_mem_rs2_data;
+    logic [4:0]  ex_mem_rd;
+    logic        ex_mem_reg_write;
+    logic        ex_mem_mem_read;
+    logic        ex_mem_mem_write;
+    logic        ex_mem_mem_to_reg;
+    logic        ex_mem_jump;
+    logic [2:0]  ex_mem_funct3;
+
+    // MEM/WB Pipeline Register
+    logic [31:0] mem_wb_pc_plus_4;
+    logic [31:0] mem_wb_alu_result;
+    logic [31:0] mem_wb_mem_data;
+    logic [4:0]  mem_wb_rd;
+    logic        mem_wb_reg_write;
+    logic        mem_wb_mem_to_reg;
+    logic        mem_wb_jump;
+
+    logic [31:0] wb_data;
+
     // =====================
     // Stage 1: Instruction Fetch (IF)
     // =====================
@@ -107,10 +109,9 @@ module riscv_cpu(
     assign pc_plus_4 = pc + 32'd4;
     assign imem_addr = pc;
     
-    // PC update
     always_ff @(posedge clk or posedge rst) begin
         if (rst) begin
-            pc <= 32'h00000000; // Start at address 0
+            pc <= 32'h00000000;
         end 
         else if (!stall) begin
             pc <= pc_next;
@@ -118,20 +119,24 @@ module riscv_cpu(
     end
 
     // =====================
-    // IF/ID Pipeline Register
+    // IF/ID1 Pipeline Register
     // =====================
     always_ff @(posedge clk or posedge rst) begin
-        if (rst || pc_src) begin
-            // Asynchronous reset or synchronous flush on branch/jump taken
-            if_id_pc           <= 32'b0;
-            if_id_pc_plus_4    <= 32'b0;
-            if_id_instruction  <= 32'b0;
+        if (rst) begin
+            // Asynchronous reset
+            if_id1_pc           <= 32'b0;
+            if_id1_pc_plus_4    <= 32'b0;
+            if_id1_instruction  <= 32'b0;
+        end else if (pc_src) begin
+            // Synchronous flush on branch/jump taken
+            if_id1_pc           <= 32'b0;
+            if_id1_pc_plus_4    <= 32'b0;
+            if_id1_instruction  <= 32'b0;
         end else if (!stall) begin
-            if_id_pc           <= pc;
-            if_id_pc_plus_4    <= pc_plus_4;
-            if_id_instruction  <= imem_data;
+            if_id1_pc           <= pc;
+            if_id1_pc_plus_4    <= pc_plus_4;
+            if_id1_instruction  <= imem_data;
         end
-        // When stall is active, IF/ID freezes
     end
 
     // =====================
@@ -156,15 +161,15 @@ module riscv_cpu(
     logic [2:0]  funct3;
     logic is_jalr;
 
-    assign rd     = if_id_instruction[11:7];
-    assign rs1    = if_id_instruction[19:15];
-    assign rs2    = if_id_instruction[24:20];
-    assign funct3 = if_id_instruction[14:12];
-    assign is_jalr = (if_id_instruction[6:0] == 7'b1100111);
+    assign rd     = if_id1_instruction[11:7];
+    assign rs1    = if_id1_instruction[19:15];
+    assign rs2    = if_id1_instruction[24:20];
+    assign funct3 = if_id1_instruction[14:12];
+    assign is_jalr = (if_id1_instruction[6:0] == 7'b1100111);
 
     // Control Unit
     control_unit u_control (
-        .instruction(if_id_instruction),
+        .instruction(if_id1_instruction),
         .alu_sel(alu_sel),
         .alu_src(alu_src),
         .alu_pc_src(alu_pc_src),
@@ -179,7 +184,7 @@ module riscv_cpu(
 
     // Immediate Generator
     immediate_generator u_imm_gen (
-        .instruction(if_id_instruction),
+        .instruction(if_id1_instruction),
         .imm_sel(imm_sel),
         .immediate(immediate)
     );
@@ -197,10 +202,6 @@ module riscv_cpu(
         .rdata2(rs2_data)          // ID stage read data 2
     );
 
-
-    // =====================
-    // ID1/ID2 Pipeline Register
-    // =====================
     // Forwarding bypass for ID1 capture: EX/MEM > MEM/WB > Register File
     // This ensures id1_id2_rs*_data has the most recent value for use in ID2 forwarding
     logic [31:0] id1_rs1_data_byp;
@@ -225,10 +226,11 @@ module riscv_cpu(
         end
     end
 
-    // Stall/Flush logic for ID1/ID2 (mirrors later ID/EX stage style)
+    // =====================
+    // ID1/ID2 Pipeline Register
+    // =====================
     always_ff @(posedge clk or posedge rst) begin
         if (rst) begin
-            // Asynchronous reset
             id1_id2_pc         <= 32'b0;
             id1_id2_pc_plus_4  <= 32'b0;
             id1_id2_rs1_data   <= 32'b0;
@@ -250,33 +252,7 @@ module riscv_cpu(
             id1_id2_is_jalr    <= 1'b0;
             id1_id2_instruction<= 32'b0;
         end else if (pc_src) begin
-            // Synchronous flush on any control-flow change (branch taken OR jump).
-            // Important: with the ID1/ID2 split, flushing IF/ID alone is not enough because
-            // ID1/ID2 would otherwise still latch the wrong-path instruction on the same edge.
-            // This does NOT prevent the branch/jump instruction itself from advancing into ID/EX,
-            // since ID/EX captures the previous-cycle ID1/ID2 contents.
-            id1_id2_pc         <= 32'b0;
-            id1_id2_pc_plus_4  <= 32'b0;
-            id1_id2_rs1_data   <= 32'b0;
-            id1_id2_rs2_data   <= 32'b0;
-            id1_id2_immediate  <= 32'b0;
-            id1_id2_rd         <= 5'b0;
-            id1_id2_rs1        <= 5'b0;
-            id1_id2_rs2        <= 5'b0;
-            id1_id2_funct3     <= 3'b0;
-            id1_id2_alu_sel    <= 5'b0;
-            id1_id2_alu_src    <= 1'b0;
-            id1_id2_alu_pc_src <= 1'b0;
-            id1_id2_reg_write  <= 1'b0;
-            id1_id2_mem_read   <= 1'b0;
-            id1_id2_mem_write  <= 1'b0;
-            id1_id2_mem_to_reg <= 1'b0;
-            id1_id2_branch     <= 1'b0;
-            id1_id2_jump       <= 1'b0;
-            id1_id2_is_jalr    <= 1'b0;
-            id1_id2_instruction<= 32'b0;
-        end else if (branch_flush) begin
-            // Synchronous flush on branch taken (only for conditional branches)
+            // Synchronous flush on branch/jump taken
             id1_id2_pc         <= 32'b0;
             id1_id2_pc_plus_4  <= 32'b0;
             id1_id2_rs1_data   <= 32'b0;
@@ -298,17 +274,15 @@ module riscv_cpu(
             id1_id2_is_jalr    <= 1'b0;
             id1_id2_instruction<= 32'b0;
         end else if (!stall) begin
-            // Normal operation (freeze ID1/ID2 during stall)
-            id1_id2_pc         <= if_id_pc;
-            id1_id2_pc_plus_4  <= if_id_pc_plus_4;
-            id1_id2_rs1_data   <= id1_rs1_data_byp;  // Forwarded regfile read (computed in always_comb)
-            id1_id2_rs2_data   <= id1_rs2_data_byp;  // Forwarded regfile read (computed in always_comb)
-            id1_id2_immediate  <= immediate;     // From ImmGen
+            id1_id2_pc         <= if_id1_pc;
+            id1_id2_pc_plus_4  <= if_id1_pc_plus_4;
+            id1_id2_rs1_data   <= id1_rs1_data_byp;
+            id1_id2_rs2_data   <= id1_rs2_data_byp;
+            id1_id2_immediate  <= immediate;
             id1_id2_rd         <= rd;
             id1_id2_rs1        <= rs1;
             id1_id2_rs2        <= rs2;
             id1_id2_funct3     <= funct3;
-            // Pass Control Signals
             id1_id2_alu_sel    <= alu_sel;
             id1_id2_alu_src    <= alu_src;
             id1_id2_alu_pc_src <= alu_pc_src;
@@ -319,10 +293,9 @@ module riscv_cpu(
             id1_id2_branch     <= branch;
             id1_id2_jump       <= jump;
             id1_id2_is_jalr    <= is_jalr;
-            id1_id2_instruction<= if_id_instruction;
+            id1_id2_instruction<= if_id1_instruction;
         end
     end
-
 
     // =====================
     // ID Stage Forwarding (for branch comparator)
@@ -332,18 +305,10 @@ module riscv_cpu(
     logic [1:0]  id_forward_rs1;
     logic [1:0]  id_forward_rs2;
     
-    // Forward declaration for wb_data (calculated in forwarding unit section)
-    // Calculate wb_data early so it can be used in ID1/ID2 bypass
-    logic [31:0] wb_data;
-    assign wb_data = mem_wb_jump ? mem_wb_pc_plus_4 :
-                     (mem_wb_mem_to_reg ? mem_wb_mem_data : mem_wb_alu_result);
-
     // ID-stage forwarding detection for rs1
-    // Priority: ID/EX (ALU result from prev instr) > EX/MEM > MEM/WB > Register File
+    // Priority: ID2/EX (ALU result from prev instr) > EX/MEM > MEM/WB > Register File
     always_comb begin
-        if ((id1_id2_rs1 != 5'b0) && (id1_id2_rs1 == id_ex_rd) && id_ex_reg_write && !id_ex_mem_read) begin
-            // Forward from ID/EX (previous instruction's result will be in EX/MEM next cycle)
-            // But we can't use it yet - this is a hazard that requires stall
+        if ((id1_id2_rs1 != 5'b0) && (id1_id2_rs1 == id2_ex_rd) && id2_ex_reg_write && !id2_ex_mem_read) begin
             id_forward_rs1 = 2'b00; // Will be handled by stall logic
         end else if ((id1_id2_rs1 != 5'b0) && (id1_id2_rs1 == ex_mem_rd) && ex_mem_reg_write) begin
             id_forward_rs1 = 2'b10; // Forward from EX/MEM
@@ -356,14 +321,14 @@ module riscv_cpu(
 
     // ID-stage forwarding detection for rs2
     always_comb begin
-        if ((id1_id2_rs2 != 5'b0) && (id1_id2_rs2 == id_ex_rd) && id_ex_reg_write && !id_ex_mem_read) begin
-            id_forward_rs2 = 2'b00; // Will be handled by stall logic
+        if ((id1_id2_rs2 != 5'b0) && (id1_id2_rs2 == id2_ex_rd) && id2_ex_reg_write && !id2_ex_mem_read) begin
+            id_forward_rs2 = 2'b00;
         end else if ((id1_id2_rs2 != 5'b0) && (id1_id2_rs2 == ex_mem_rd) && ex_mem_reg_write) begin
-            id_forward_rs2 = 2'b10; // Forward from EX/MEM
+            id_forward_rs2 = 2'b10;
         end else if ((id1_id2_rs2 != 5'b0) && (id1_id2_rs2 == mem_wb_rd) && mem_wb_reg_write) begin
-            id_forward_rs2 = 2'b01; // Forward from MEM/WB
+            id_forward_rs2 = 2'b01;
         end else begin
-            id_forward_rs2 = 2'b00; // Use register file
+            id_forward_rs2 = 2'b00;
         end
     end
 
@@ -376,9 +341,9 @@ module riscv_cpu(
         endcase
         
         case (id_forward_rs2)
-            2'b10:   id_rs2_forwarded = ex_mem_alu_result;  // Forward from EX/MEM
-            2'b01:   id_rs2_forwarded = wb_data;            // Forward from MEM/WB
-            default: id_rs2_forwarded = id1_id2_rs2_data;   // Use register file
+            2'b10:   id_rs2_forwarded = ex_mem_alu_result;
+            2'b01:   id_rs2_forwarded = wb_data;
+            default: id_rs2_forwarded = id1_id2_rs2_data;
         endcase
     end
 
@@ -399,103 +364,82 @@ module riscv_cpu(
         .branch_taken(id_branch_taken)
     );
 
-    // Branch/Jump target calculation (in ID stage)
     assign id_branch_target = id1_id2_pc + id1_id2_immediate;
-    
-    // For JAL, target is PC + immediate (can be calculated in ID)
-    // For JALR, target is rs1 + immediate (needs forwarded rs1, calculated here)
-    // Use the pre-decoded is_jalr signal from ID1/ID2 pipeline register
     assign id_jump_target = id1_id2_is_jalr ? (id_rs1_forwarded + id1_id2_immediate) : id_branch_target;
-    
-    // PC source selection (now in ID stage)
-    // IMPORTANT: Don't take branch/jump during stall - operands may not be ready
-    // The stall ensures we wait until correct values are available
     assign id_pc_src = !stall && ((id1_id2_branch && id_branch_taken) || id1_id2_jump);
     
     // Branch flush signal - only for conditional branches, NOT jumps
-    // Jumps (JAL/JALR) need to propagate through pipeline to write return address
-    // IMPORTANT: Don't flush during stall - wait for correct branch decision
     logic branch_flush;
     assign branch_flush = !stall && id1_id2_branch && id_branch_taken;
 
-    // =====================
-    // ID/EX Pipeline Register
-    // =====================
-    // Use the same forwarded operands that branch comparator uses.
-    // This ensures consistency: branch decisions and ALU operands see the same values.
+    // PC Assignments
+    assign pc_src = id_pc_src;
+    assign pc_next = pc_src ? id_jump_target : pc_plus_4;
 
+    // =====================
+    // ID2/EX Pipeline Register
+    // =====================
     always_ff @(posedge clk or posedge rst) begin
         if (rst) begin
-            // Asynchronous reset
-            id_ex_pc           <= 32'b0;
-            id_ex_pc_plus_4    <= 32'b0;
-            id_ex_rs1_data     <= 32'b0;
-            id_ex_rs2_data     <= 32'b0;
-            id_ex_immediate    <= 32'b0;
-            id_ex_rd           <= 5'b0;
-            id_ex_rs1          <= 5'b0;
-            id_ex_rs2          <= 5'b0;
-            id_ex_alu_sel      <= 5'b0;
-            id_ex_alu_src      <= 1'b0;
-            id_ex_alu_pc_src   <= 1'b0;
-            id_ex_reg_write    <= 1'b0;
-            id_ex_mem_read     <= 1'b0;
-            id_ex_mem_write    <= 1'b0;
-            id_ex_mem_to_reg   <= 1'b0;
-            id_ex_branch       <= 1'b0;
-            id_ex_jump         <= 1'b0;
-            id_ex_funct3       <= 3'b0;
+            id2_ex_pc           <= 32'b0;
+            id2_ex_pc_plus_4    <= 32'b0;
+            id2_ex_rs1_data     <= 32'b0;
+            id2_ex_rs2_data     <= 32'b0;
+            id2_ex_immediate    <= 32'b0;
+            id2_ex_rd           <= 5'b0;
+            id2_ex_rs1          <= 5'b0;
+            id2_ex_rs2          <= 5'b0;
+            id2_ex_alu_sel      <= 5'b0;
+            id2_ex_alu_src      <= 1'b0;
+            id2_ex_alu_pc_src   <= 1'b0;
+            id2_ex_reg_write    <= 1'b0;
+            id2_ex_mem_read     <= 1'b0;
+            id2_ex_mem_write    <= 1'b0;
+            id2_ex_mem_to_reg   <= 1'b0;
+            id2_ex_branch       <= 1'b0;
+            id2_ex_jump         <= 1'b0;
+            id2_ex_funct3       <= 3'b0;
         end else if (branch_flush || stall) begin
-            // Synchronous flush on BRANCH taken (not jump!), or insert bubble on stall
             // Note: Jumps must NOT be flushed - they need to reach WB to write return address
-            id_ex_pc           <= 32'b0;
-            id_ex_pc_plus_4    <= 32'b0;
-            id_ex_rs1_data     <= 32'b0;
-            id_ex_rs2_data     <= 32'b0;
-            id_ex_immediate    <= 32'b0;
-            id_ex_rd           <= 5'b0;
-            id_ex_rs1          <= 5'b0;
-            id_ex_rs2          <= 5'b0;
-            id_ex_alu_sel      <= 5'b0;
-            id_ex_alu_src      <= 1'b0;
-            id_ex_alu_pc_src   <= 1'b0;
-            id_ex_reg_write    <= 1'b0;
-            id_ex_mem_read     <= 1'b0;
-            id_ex_mem_write    <= 1'b0;
-            id_ex_mem_to_reg   <= 1'b0;
-            id_ex_branch       <= 1'b0;
-            id_ex_jump         <= 1'b0;
-            id_ex_funct3       <= 3'b0;
+            id2_ex_pc           <= 32'b0;
+            id2_ex_pc_plus_4    <= 32'b0;
+            id2_ex_rs1_data     <= 32'b0;
+            id2_ex_rs2_data     <= 32'b0;
+            id2_ex_immediate    <= 32'b0;
+            id2_ex_rd           <= 5'b0;
+            id2_ex_rs1          <= 5'b0;
+            id2_ex_rs2          <= 5'b0;
+            id2_ex_alu_sel      <= 5'b0;
+            id2_ex_alu_src      <= 1'b0;
+            id2_ex_alu_pc_src   <= 1'b0;
+            id2_ex_reg_write    <= 1'b0;
+            id2_ex_mem_read     <= 1'b0;
+            id2_ex_mem_write    <= 1'b0;
+            id2_ex_mem_to_reg   <= 1'b0;
+            id2_ex_branch       <= 1'b0;
+            id2_ex_jump         <= 1'b0;
+            id2_ex_funct3       <= 3'b0;
         end else begin
-            // Normal operation
-            id_ex_pc           <= id1_id2_pc;
-            id_ex_pc_plus_4    <= id1_id2_pc_plus_4;
-            id_ex_rs1_data     <= id_rs1_forwarded;  // Use forwarded values (includes WB bypass)
-            id_ex_rs2_data     <= id_rs2_forwarded;  // Use forwarded values (includes WB bypass)
-            id_ex_immediate    <= id1_id2_immediate;
-            id_ex_rd           <= id1_id2_rd;
-            id_ex_rs1          <= id1_id2_rs1;
-            id_ex_rs2          <= id1_id2_rs2;
-            id_ex_alu_sel      <= id1_id2_alu_sel;
-            id_ex_alu_src      <= id1_id2_alu_src;
-            id_ex_alu_pc_src   <= id1_id2_alu_pc_src;
-            id_ex_reg_write    <= id1_id2_reg_write;
-            id_ex_mem_read     <= id1_id2_mem_read;
-            id_ex_mem_write    <= id1_id2_mem_write;
-            id_ex_mem_to_reg   <= id1_id2_mem_to_reg;
-            id_ex_branch       <= id1_id2_branch;
-            id_ex_jump         <= id1_id2_jump;
-            id_ex_funct3       <= id1_id2_funct3;
+            id2_ex_pc           <= id1_id2_pc;
+            id2_ex_pc_plus_4    <= id1_id2_pc_plus_4;
+            id2_ex_rs1_data     <= id_rs1_forwarded;  // Use forwarded values (includes WB bypass)
+            id2_ex_rs2_data     <= id_rs2_forwarded;  // Use forwarded values (includes WB bypass)
+            id2_ex_immediate    <= id1_id2_immediate;
+            id2_ex_rd           <= id1_id2_rd;
+            id2_ex_rs1          <= id1_id2_rs1;
+            id2_ex_rs2          <= id1_id2_rs2;
+            id2_ex_alu_sel      <= id1_id2_alu_sel;
+            id2_ex_alu_src      <= id1_id2_alu_src;
+            id2_ex_alu_pc_src   <= id1_id2_alu_pc_src;
+            id2_ex_reg_write    <= id1_id2_reg_write;
+            id2_ex_mem_read     <= id1_id2_mem_read;
+            id2_ex_mem_write    <= id1_id2_mem_write;
+            id2_ex_mem_to_reg   <= id1_id2_mem_to_reg;
+            id2_ex_branch       <= id1_id2_branch;
+            id2_ex_jump         <= id1_id2_jump;
+            id2_ex_funct3       <= id1_id2_funct3;
         end
     end
-
-    // =====================
-    // Forwarding Unit (Data Hazard Handling for EX Stage)
-    // =====================
-    logic [31:0] rs1_data_forwarded;
-    logic [31:0] rs2_data_forwarded;
-    logic [1:0]  forward_rs1;
-    logic [1:0]  forward_rs2;
 
     // =====================
     // Hazard Detection Unit
@@ -504,23 +448,18 @@ module riscv_cpu(
     logic stall_branch;        // Branch hazard when operand not ready in ID stage
     
     // Load-use hazard: instruction in EX is a load, and current instruction needs its result
-    assign stall_load_use = id_ex_mem_read && 
-                            (id_ex_rd != 5'b0) &&
-                            ((id_ex_rd == id1_id2_rs1) || (id_ex_rd == id1_id2_rs2));
+    assign stall_load_use = id2_ex_mem_read && 
+                            (id2_ex_rd != 5'b0) &&
+                            ((id2_ex_rd == id1_id2_rs1) || (id2_ex_rd == id1_id2_rs2));
     
-    // Branch/Jump hazard: branch/jump in ID2 needs data from instruction in EX (not yet available)
-    // This includes:
-    // 1. Previous instruction (in ID/EX) writes to a register that branch needs
-    // 2. Load in ID/EX - need 2 cycles (handled by stall_load_use being active for 2 cycles)
-    // 3. Load in EX/MEM - need 1 cycle (data comes from memory this cycle)
     logic branch_needs_rs1, branch_needs_rs2;
     assign branch_needs_rs1 = (id1_id2_branch || id1_id2_is_jalr) && (id1_id2_rs1 != 5'b0);
     assign branch_needs_rs2 = id1_id2_branch && (id1_id2_rs2 != 5'b0);
     
-    // Stall if branch/jump needs result from instruction in ID/EX (not yet computed)
+    // Stall if branch/jump needs result from instruction in ID2/EX (not yet computed)
     logic stall_branch_id_ex;
-    assign stall_branch_id_ex = ((branch_needs_rs1 && (id1_id2_rs1 == id_ex_rd) && id_ex_reg_write) ||
-                                  (branch_needs_rs2 && (id1_id2_rs2 == id_ex_rd) && id_ex_reg_write));
+    assign stall_branch_id_ex = ((branch_needs_rs1 && (id1_id2_rs1 == id2_ex_rd) && id2_ex_reg_write) ||
+                                  (branch_needs_rs2 && (id1_id2_rs2 == id2_ex_rd) && id2_ex_reg_write));
     
     // Stall if branch needs result from load in EX/MEM (data being read from memory this cycle)
     logic stall_branch_ex_mem_load;
@@ -529,31 +468,34 @@ module riscv_cpu(
                                         (branch_needs_rs2 && (id1_id2_rs2 == ex_mem_rd)));
     
     assign stall_branch = stall_branch_id_ex || stall_branch_ex_mem_load;
-    
-    // Combined stall signal
     assign stall = stall_load_use || stall_branch;
 
-    // Forwarding detection for rs1
+    // =====================
+    // Forwarding Unit
+    // =====================
+    // Priority: EX/MEM > MEM/WB > Register File
+    logic [31:0] rs1_data_forwarded;
+    logic [31:0] rs2_data_forwarded;
+    logic [1:0]  forward_rs1;
+    logic [1:0]  forward_rs2;
+
     always_comb begin
-        // Priority: EX/MEM > MEM/WB > Register File
-        if ((id_ex_rs1 != 5'b0) && (id_ex_rs1 == ex_mem_rd) && ex_mem_reg_write) begin
+        if ((id2_ex_rs1 != 5'b0) && (id2_ex_rs1 == ex_mem_rd) && ex_mem_reg_write) begin
             forward_rs1 = 2'b10; // Forward from EX/MEM
-        end else if ((id_ex_rs1 != 5'b0) && (id_ex_rs1 == mem_wb_rd) && mem_wb_reg_write) begin
+        end else if ((id2_ex_rs1 != 5'b0) && (id2_ex_rs1 == mem_wb_rd) && mem_wb_reg_write) begin
             forward_rs1 = 2'b01; // Forward from MEM/WB
         end else begin
             forward_rs1 = 2'b00; // Use register file
         end
     end
 
-    // Forwarding detection for rs2
     always_comb begin
-        // Priority: EX/MEM > MEM/WB > Register File
-        if ((id_ex_rs2 != 5'b0) && (id_ex_rs2 == ex_mem_rd) && ex_mem_reg_write) begin
-            forward_rs2 = 2'b10; // Forward from EX/MEM
-        end else if ((id_ex_rs2 != 5'b0) && (id_ex_rs2 == mem_wb_rd) && mem_wb_reg_write) begin
-            forward_rs2 = 2'b01; // Forward from MEM/WB
+        if ((id2_ex_rs2 != 5'b0) && (id2_ex_rs2 == ex_mem_rd) && ex_mem_reg_write) begin
+            forward_rs2 = 2'b10;
+        end else if ((id2_ex_rs2 != 5'b0) && (id2_ex_rs2 == mem_wb_rd) && mem_wb_reg_write) begin
+            forward_rs2 = 2'b01;
         end else begin
-            forward_rs2 = 2'b00; // Use register file
+            forward_rs2 = 2'b00;
         end
     end
 
@@ -562,16 +504,13 @@ module riscv_cpu(
         case (forward_rs1)
             2'b10: rs1_data_forwarded = ex_mem_alu_result;  // Forward from EX/MEM
             2'b01: rs1_data_forwarded = wb_data;             // Forward from MEM/WB
-            // Default should use the *pipeline-registered* operand from ID/EX.
-            // Using the EX-stage regfile read (`ex_rs1_data_current`) creates a long path:
-            // id_ex_rs1[*] (address) -> regfile mux -> forwarding mux -> ALU -> EX/MEM flop.
-            default: rs1_data_forwarded = id_ex_rs1_data;
+            default: rs1_data_forwarded = id2_ex_rs1_data;   // Register file decoded in ID stage
         endcase
         
         case (forward_rs2)
-            2'b10: rs2_data_forwarded = ex_mem_alu_result;  // Forward from EX/MEM
-            2'b01: rs2_data_forwarded = wb_data;             // Forward from MEM/WB
-            default: rs2_data_forwarded = id_ex_rs2_data;
+            2'b10: rs2_data_forwarded = ex_mem_alu_result; 
+            2'b01: rs2_data_forwarded = wb_data;             
+            default: rs2_data_forwarded = id2_ex_rs2_data;   
         endcase
     end
 
@@ -582,22 +521,16 @@ module riscv_cpu(
     logic [31:0] alu_operand_b;
     logic [31:0] alu_result;
 
-    // ALU operand selection (with forwarding)
-    assign alu_operand_a = id_ex_alu_pc_src ? id_ex_pc : rs1_data_forwarded;
-    assign alu_operand_b = id_ex_alu_src ? id_ex_immediate : rs2_data_forwarded;
+    assign alu_operand_a = id2_ex_alu_pc_src ? id2_ex_pc : rs1_data_forwarded;
+    assign alu_operand_b = id2_ex_alu_src ? id2_ex_immediate : rs2_data_forwarded;
 
-    // ALU (no longer used for branch comparison - that's in ID stage now)
+    // ALU
     alu_core u_alu (
-        .alu_sel(id_ex_alu_sel),
+        .alu_sel(id2_ex_alu_sel),
         .operand_a(alu_operand_a),
         .operand_b(alu_operand_b),
         .result(alu_result)
     );
-
-    // Branch/Jump is now resolved in ID stage (see branch_comparator above)
-    // PC source selection uses ID stage signals
-    assign pc_src = id_pc_src;
-    assign pc_next = pc_src ? id_jump_target : pc_plus_4;
 
     // =====================
     // EX/MEM Pipeline Register
@@ -615,16 +548,16 @@ module riscv_cpu(
             ex_mem_jump        <= 1'b0;
             ex_mem_funct3      <= 3'b0;
         end else begin
-            ex_mem_pc_plus_4   <= id_ex_pc_plus_4;
+            ex_mem_pc_plus_4   <= id2_ex_pc_plus_4;
             ex_mem_alu_result  <= alu_result;
             ex_mem_rs2_data    <= rs2_data_forwarded;  // Use forwarded value for stores
-            ex_mem_rd          <= id_ex_rd;
-            ex_mem_reg_write   <= id_ex_reg_write;
-            ex_mem_mem_read    <= id_ex_mem_read;
-            ex_mem_mem_write   <= id_ex_mem_write;
-            ex_mem_mem_to_reg  <= id_ex_mem_to_reg;
-            ex_mem_jump        <= id_ex_jump;
-            ex_mem_funct3      <= id_ex_funct3;
+            ex_mem_rd          <= id2_ex_rd;
+            ex_mem_reg_write   <= id2_ex_reg_write;
+            ex_mem_mem_read    <= id2_ex_mem_read;
+            ex_mem_mem_write   <= id2_ex_mem_write;
+            ex_mem_mem_to_reg  <= id2_ex_mem_to_reg;
+            ex_mem_jump        <= id2_ex_jump;
+            ex_mem_funct3      <= id2_ex_funct3;
         end
     end
 
@@ -662,8 +595,8 @@ module riscv_cpu(
     // =====================
     // Stage 5: Writeback (WB)
     // =====================
-    // Writeback mux: JAL/JALR -> PC+4, Load -> memory data, else -> ALU result
-    // (wb_data is already calculated in forwarding unit above)
+    assign wb_data = mem_wb_jump ? mem_wb_pc_plus_4 :
+                     (mem_wb_mem_to_reg ? mem_wb_mem_data : mem_wb_alu_result);
 
 endmodule
 
