@@ -4,7 +4,7 @@ Author: Ryan Eng
 RISC-V Immediate Generator
 Extracts and sign-extends immediates from instruction based on type
 
-ASIC Version - OpenLane compatible
+ASIC Version - LibreLane compatible
 */
 
 `timescale 1ns / 1ps

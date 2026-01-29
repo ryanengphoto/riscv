@@ -6,7 +6,7 @@ Performs direct comparison of register values for branch decisions
 This module operates in the ID stage for early branch resolution,
 reducing the critical path by avoiding the ALU.
 
-ASIC Version - OpenLane compatible
+ASIC Version - LibreLane compatible
 */
 
 `timescale 1ns / 1ps

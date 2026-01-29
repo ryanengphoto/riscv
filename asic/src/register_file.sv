@@ -5,7 +5,7 @@ RISC-V Register File
 32 registers (x0-x31), where x0 is hardwired to 0
 4 read ports (2 for ID stage, 2 for EX stage), 1 write port
 
-ASIC Version - OpenLane compatible
+ASIC Version - LibreLane compatible
 */
 
 `timescale 1ns / 1ps

@@ -5,7 +5,7 @@ This module contains the logic for the ALU itself
 Purely combinational block for RISC-V CPU
 Supports RV32I base + Zbb (Bitmanip Basic) extension
 
-ASIC Version - OpenLane compatible
+ASIC Version - LibreLane compatible
 */
 
 `timescale 1ns / 1ps

@@ -3,13 +3,27 @@ Author: Ryan Eng
 
 RISC-V Control Unit
 Decodes RISC-V instructions and generates control signals
-Supports: R-type, I-type, S-type, B-type, U-type, J-type
 
-ASIC Version - OpenLane compatible
+Supported Instruction Sets:
+  - RV32I Base: R-type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
+                I-type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
+                Loads (LB, LH, LW, LBU, LHU)
+                Stores (SB, SH, SW)
+                Branches (BEQ, BNE, BLT, BGE, BLTU, BGEU)
+                JAL, JALR
+                LUI, AUIPC
+  - Zbb Bit Manipulation Extension: ANDN, ORN, XNOR, MIN, MINU, MAX, MAXU
+                                     ROL, ROR, RORI
+                                     CLZ, CTZ, CPOP
+                                     SEXT.B, SEXT.H, ZEXT.H
+                                     ORC.B, REV8
+
+ASIC Version - LibreLane compatible
 */
 
 `timescale 1ns / 1ps
 `include "alu_defs.svh"
+`include "riscv_defs.svh"
 
 module control_unit(
     input  logic [31:0] instruction,
@@ -52,63 +66,64 @@ module control_unit(
 
         case (opcode)
             // R-type instructions (RV32I + Zbb)
-            7'b0110011: begin
+            OPCODE_OP: begin
                 reg_write = 1'b1;
                 alu_src   = 1'b0;
                 mem_to_reg = 1'b0;
-                imm_sel   = 3'b000; // not used
+                imm_sel   = IMM_TYPE_I;
                 
                 case (funct7)
                     // Standard RV32I R-type
-                    7'b0000000: begin
+                    FUNCT7_BASE: begin
                         case (funct3)
-                            3'b000: alu_sel = ALU_ADD;  // ADD
-                            3'b001: alu_sel = ALU_SLL;  // SLL
-                            3'b010: alu_sel = ALU_SLT;  // SLT
-                            3'b011: alu_sel = ALU_SLTU; // SLTU
-                            3'b100: alu_sel = ALU_XOR;  // XOR
-                            3'b101: alu_sel = ALU_SRL;  // SRL
-                            3'b110: alu_sel = ALU_OR;   // OR
-                            3'b111: alu_sel = ALU_AND;  // AND
+                            FUNCT3_ADD_SUB: alu_sel = ALU_ADD;
+                            FUNCT3_SLL:     alu_sel = ALU_SLL;
+                            FUNCT3_SLT:     alu_sel = ALU_SLT;
+                            FUNCT3_SLTU:    alu_sel = ALU_SLTU;
+                            FUNCT3_XOR:     alu_sel = ALU_XOR;
+                            FUNCT3_SRL_SRA: alu_sel = ALU_SRL;
+                            FUNCT3_OR:      alu_sel = ALU_OR;
+                            FUNCT3_AND:     alu_sel = ALU_AND;
+                            default:        alu_sel = ALU_NOP;
                         endcase
                     end
                     
                     // SUB, SRA + Zbb (ANDN, ORN, XNOR)
-                    7'b0100000: begin
+                    FUNCT7_SUB_SRA: begin
                         case (funct3)
-                            3'b000: alu_sel = ALU_SUB;  // SUB
-                            3'b100: alu_sel = ALU_XNOR; // XNOR (Zbb)
-                            3'b101: alu_sel = ALU_SRA;  // SRA
-                            3'b110: alu_sel = ALU_ORN;  // ORN (Zbb)
-                            3'b111: alu_sel = ALU_ANDN; // ANDN (Zbb)
-                            default: alu_sel = ALU_NOP;
+                            FUNCT3_ADD_SUB: alu_sel = ALU_SUB;
+                            FUNCT3_XOR:     alu_sel = ALU_XNOR;
+                            FUNCT3_SRL_SRA: alu_sel = ALU_SRA;
+                            FUNCT3_OR:      alu_sel = ALU_ORN;
+                            FUNCT3_AND:     alu_sel = ALU_ANDN;
+                            default:        alu_sel = ALU_NOP;
                         endcase
                     end
                     
                     // Zbb: MIN/MAX family
-                    7'b0000101: begin
+                    FUNCT7_MIN_MAX: begin
                         case (funct3)
-                            3'b100: alu_sel = ALU_MIN;  // MIN
-                            3'b101: alu_sel = ALU_MINU; // MINU
-                            3'b110: alu_sel = ALU_MAX;  // MAX
-                            3'b111: alu_sel = ALU_MAXU; // MAXU
-                            default: alu_sel = ALU_NOP;
+                            FUNCT3_XOR: alu_sel = ALU_MIN;
+                            FUNCT3_SRL_SRA: alu_sel = ALU_MINU;
+                            FUNCT3_OR:  alu_sel = ALU_MAX;
+                            FUNCT3_AND: alu_sel = ALU_MAXU;
+                            default:    alu_sel = ALU_NOP;
                         endcase
                     end
                     
                     // Zbb: ROL, ROR (register)
-                    7'b0110000: begin
+                    FUNCT7_ROL_ROR: begin
                         case (funct3)
-                            3'b001: alu_sel = ALU_ROL;  // ROL
-                            3'b101: alu_sel = ALU_ROR;  // ROR
-                            default: alu_sel = ALU_NOP;
+                            FUNCT3_SLL:     alu_sel = ALU_ROL;
+                            FUNCT3_SRL_SRA: alu_sel = ALU_ROR;
+                            default:        alu_sel = ALU_NOP;
                         endcase
                     end
                     
-                    // Zbb: ZEXT.H (encoded as PACK with rs2=x0)
-                    7'b0000100: begin
-                        if (funct3 == 3'b100)
-                            alu_sel = ALU_ZEXTH; // ZEXT.H
+                    // Zbb: ZEXT.H
+                    FUNCT7_ZEXTH: begin
+                        if (funct3 == FUNCT3_XOR)
+                            alu_sel = ALU_ZEXTH;
                         else
                             alu_sel = ALU_NOP;
                     end
@@ -118,47 +133,47 @@ module control_unit(
             end
 
             // I-type ALU instructions (RV32I + Zbb)
-            7'b0010011: begin
+            OPCODE_OP_IMM: begin
                 reg_write = 1'b1;
-                alu_src   = 1'b1;  // use immediate
+                alu_src   = 1'b1;
                 mem_to_reg = 1'b0;
-                imm_sel   = 3'b000; // I-type immediate
+                imm_sel   = IMM_TYPE_I;
                 
                 case (funct3)
-                    3'b000: alu_sel = ALU_ADD;  // ADDI
-                    3'b010: alu_sel = ALU_SLT;  // SLTI
-                    3'b011: alu_sel = ALU_SLTU; // SLTIU
-                    3'b100: alu_sel = ALU_XOR;  // XORI
-                    3'b110: alu_sel = ALU_OR;   // ORI
-                    3'b111: alu_sel = ALU_AND;  // ANDI
+                    FUNCT3_ADD_SUB: alu_sel = ALU_ADD;
+                    FUNCT3_SLT:    alu_sel = ALU_SLT;
+                    FUNCT3_SLTU:   alu_sel = ALU_SLTU;
+                    FUNCT3_XOR:    alu_sel = ALU_XOR;
+                    FUNCT3_OR:     alu_sel = ALU_OR;
+                    FUNCT3_AND:    alu_sel = ALU_AND;
                     
                     // Shift and Zbb unary operations
-                    3'b001: begin
+                    FUNCT3_SLL: begin
                         case (funct7)
-                            7'b0000000: alu_sel = ALU_SLL;  // SLLI
-                            // Zbb unary ops (use shamt field to distinguish)
-                            7'b0110000: begin
-                                case (instruction[24:20])  // shamt field (bits 24-20)
-                                    5'b00000: alu_sel = ALU_CLZ;   // CLZ
-                                    5'b00001: alu_sel = ALU_CTZ;   // CTZ
-                                    5'b00010: alu_sel = ALU_CPOP;  // CPOP
-                                    5'b00100: alu_sel = ALU_SEXTB; // SEXT.B
-                                    5'b00101: alu_sel = ALU_SEXTH; // SEXT.H
-                                    default:  alu_sel = ALU_NOP;
+                            FUNCT7_BASE: alu_sel = ALU_SLL;
+                            // Zbb unary ops (shamt field distinguishes operation)
+                            FUNCT7_ROL_ROR: begin
+                                case (instruction[24:20])
+                                    SHAMT_CLZ:   alu_sel = ALU_CLZ;
+                                    SHAMT_CTZ:   alu_sel = ALU_CTZ;
+                                    SHAMT_CPOP:  alu_sel = ALU_CPOP;
+                                    SHAMT_SEXTB: alu_sel = ALU_SEXTB;
+                                    SHAMT_SEXTH: alu_sel = ALU_SEXTH;
+                                    default:     alu_sel = ALU_NOP;
                                 endcase
                             end
                             default: alu_sel = ALU_NOP;
                         endcase
                     end
                     
-                    3'b101: begin
+                    FUNCT3_SRL_SRA: begin
                         case (funct7)
-                            7'b0000000: alu_sel = ALU_SRL;  // SRLI
-                            7'b0100000: alu_sel = ALU_SRA;  // SRAI
-                            7'b0110000: alu_sel = ALU_ROR;  // RORI (Zbb)
-                            7'b0010100: alu_sel = ALU_ORCB; // ORC.B (Zbb)
-                            7'b0110100: alu_sel = ALU_REV8; // REV8 (Zbb)
-                            default:    alu_sel = ALU_NOP;
+                            FUNCT7_BASE:     alu_sel = ALU_SRL;
+                            FUNCT7_SUB_SRA:  alu_sel = ALU_SRA;
+                            FUNCT7_ROL_ROR:  alu_sel = ALU_ROR;
+                            FUNCT7_ORCB:     alu_sel = ALU_ORCB;
+                            FUNCT7_REV8:     alu_sel = ALU_REV8;
+                            default:         alu_sel = ALU_NOP;
                         endcase
                     end
                     
@@ -167,69 +182,68 @@ module control_unit(
             end
 
             // Load instructions (LB, LH, LW, LBU, LHU)
-            7'b0000011: begin
+            OPCODE_LOAD: begin
                 reg_write = 1'b1;
-                alu_src   = 1'b1;  // use immediate for address calculation
+                alu_src   = 1'b1;
                 mem_read  = 1'b1;
-                mem_to_reg = 1'b1; // load from memory
-                alu_sel   = ALU_ADD; // ADD for address calculation
-                imm_sel   = 3'b000; // I-type immediate
+                mem_to_reg = 1'b1;
+                alu_sel   = ALU_ADD;
+                imm_sel   = IMM_TYPE_I;
             end
 
             // Store instructions (SB, SH, SW)
-            7'b0100011: begin
+            OPCODE_STORE: begin
                 mem_write = 1'b1;
-                alu_src   = 1'b1;  // use immediate for address calculation
-                alu_sel   = ALU_ADD; // ADD for address calculation
-                imm_sel   = 3'b001; // S-type immediate
+                alu_src   = 1'b1;
+                alu_sel   = ALU_ADD;
+                imm_sel   = IMM_TYPE_S;
             end
 
             // Branch instructions (BEQ, BNE, BLT, BGE, BLTU, BGEU)
-            // Branch comparison is done in ID stage by branch_comparator module
-            // ALU is not used for branches anymore (reduces critical path)
-            7'b1100011: begin
+            // Branch comparison done in ID stage by branch_comparator module
+            OPCODE_BRANCH: begin
                 branch    = 1'b1;
-                alu_src   = 1'b0;     // not used for branches
-                alu_sel   = ALU_NOP;  // ALU not needed - branch_comparator handles comparison
-                imm_sel   = 3'b010;   // B-type immediate (still needed for target calculation)
+                alu_src   = 1'b0;
+                alu_sel   = ALU_NOP;
+                imm_sel   = IMM_TYPE_B;
             end
 
             // JAL (Jump and Link)
-            7'b1101111: begin
+            OPCODE_JAL: begin
                 jump      = 1'b1;
-                reg_write = 1'b1;  // write PC+4 to rd
-                imm_sel   = 3'b011; // J-type immediate
-                alu_sel   = ALU_ADD; // ADD for PC calculation
+                reg_write = 1'b1;
+                imm_sel   = IMM_TYPE_J;
+                alu_sel   = ALU_ADD;
             end
 
             // JALR (Jump and Link Register)
-            7'b1100111: begin
+            OPCODE_JALR: begin
                 jump      = 1'b1;
-                reg_write = 1'b1;  // write PC+4 to rd
-                alu_src   = 1'b1;  // use immediate
-                imm_sel   = 3'b000; // I-type immediate
-                alu_sel   = ALU_ADD; // ADD
+                reg_write = 1'b1;
+                alu_src   = 1'b1;
+                imm_sel   = IMM_TYPE_I;
+                alu_sel   = ALU_ADD;
             end
 
             // LUI (Load Upper Immediate)
-            7'b0110111: begin
+            OPCODE_LUI: begin
                 reg_write = 1'b1;
                 alu_src   = 1'b1;
-                imm_sel   = 3'b100; // U-type immediate
-                alu_sel   = ALU_ADD; // ADD (just pass immediate)
+                imm_sel   = IMM_TYPE_U;
+                alu_sel   = ALU_ADD;
             end
 
             // AUIPC (Add Upper Immediate to PC)
-            7'b0010111: begin
+            OPCODE_AUIPC: begin
                 reg_write = 1'b1;
                 alu_src   = 1'b1;
-                alu_pc_src = 1'b1;  // Use PC as operand A
-                imm_sel   = 3'b100; // U-type immediate
-                alu_sel   = ALU_ADD; // ADD
+                alu_pc_src = 1'b1;
+                imm_sel   = IMM_TYPE_U;
+                alu_sel   = ALU_ADD;
             end
 
             default: begin
-                // NOP or unknown instruction
+                // Unknown instruction - treat as NOP
                 alu_sel    = ALU_NOP;
                 alu_src    = 1'b0;
                 alu_pc_src = 1'b0;
@@ -239,7 +253,7 @@ module control_unit(
                 mem_to_reg = 1'b0;
                 branch     = 1'b0;
                 jump       = 1'b0;
-                imm_sel    = 3'b000;
+                imm_sel    = IMM_TYPE_I;
             end
         endcase
     end
