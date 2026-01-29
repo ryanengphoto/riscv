@@ -122,12 +122,12 @@ The CPU implements a **6-stage in-order pipeline**:
 ## Tooling and Build System
 
 ### ASIC Flow
-- **Synthesis**: [Yosys](https://github.com/YosysHQ/yosys) (Verilog-2005 compatible)
+- **Synthesis**: [Yosys](https://github.com/YosysHQ/yosys)
 - **Place & Route**: [OpenROAD](https://github.com/The-OpenROAD-Project/OpenROAD)
 - **PDK**: [Sky130A](https://github.com/google/skywater-pdk) (via LibreLane/OpenLane)
 - **Timing Analysis**: Static Timing Analysis (STA) with OpenROAD
 - **DRC/LVS**: [Magic](https://github.com/RTimothyEdwards/magic) and [Netgen](https://github.com/RTimothyEdwards/netgen)
-- **Flow**: [LibreLane](https://github.com/LibreCell/LibreLane) / [OpenLane](https://github.com/The-OpenROAD-Project/OpenLane)
+- **Flow**: [LibreLane](https://librelane.readthedocs.io/en/stable/index.html)
 
 #### LibreLane Usage
 The ASIC flow uses LibreLane (OpenLane fork) with the Classic flow:
@@ -240,14 +240,13 @@ Potential improvements for future iterations:
 ### RISC-V Specifications
 - [RISC-V Instruction Set Manual](https://riscv.org/technical/specifications/)
 - [RV32I Base Instruction Set](https://github.com/riscv/riscv-isa-manual)
-- [Zbb Bit Manipulation Extension](https://github.com/riscv/riscv-bitmanip)
+- [Zbb Bit Manipulation Extension](https://five-embeddev.com/riscv-bitmanip/1.0.0/bitmanip.html#zbb)
 
 ### Tools and Frameworks
-- [LibreLane](https://github.com/LibreCell/LibreLane) - OpenLane fork for ASIC flow
-- [OpenLane](https://github.com/The-OpenROAD-Project/OpenLane) - RTL-to-GDSII flow
+- [LibreLane](https://librelane.readthedocs.io/en/stable/index.html) - OpenLane fork for ASIC flow
 - [Yosys](https://github.com/YosysHQ/yosys) - Verilog synthesis tool
 - [OpenROAD](https://github.com/The-OpenROAD-Project/OpenROAD) - Place & Route tool
 - [Sky130 PDK](https://github.com/google/skywater-pdk) - SkyWater 130nm process design kit
 - [Cursor IDE](https://cursor.sh/) - AI-powered code editor
-- [Icarus Verilog](http://iverilog.icarus.com/) - Verilog simulation tool
+- [Icarus Verilog](https://steveicarus.github.io/iverilog/) - Verilog simulation tool
 - [GTKWave](https://github.com/gtkwave/gtkwave) - Waveform viewer
