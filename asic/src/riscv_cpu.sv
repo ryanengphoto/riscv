@@ -154,14 +154,12 @@ module riscv_cpu(
     logic [4:0]  rs1;
     logic [4:0]  rs2;
     logic [2:0]  funct3;
+    logic is_jalr;
 
     assign rd     = if_id_instruction[11:7];
     assign rs1    = if_id_instruction[19:15];
     assign rs2    = if_id_instruction[24:20];
     assign funct3 = if_id_instruction[14:12];
-
-    // JALR detection (for ID1/ID2 pipeline)
-    logic is_jalr;
     assign is_jalr = (if_id_instruction[6:0] == 7'b1100111);
 
     // Control Unit
