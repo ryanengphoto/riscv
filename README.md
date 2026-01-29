@@ -182,7 +182,8 @@ make interactive # OpenLane interactive shell
 - **Clock Target**: 50 MHz (20ns period)
 - **Die Area**: 850x850 μm²
 - **Core Utilization**: 40%
-- **Synthesis Strategy**: DELAY 3 (timing-optimized)
+- **Synthesis Strategy**: AREA 3 (timing-optimized)
+- **Max Frequency**: 114 MHz (Slow Corner)
 
 ## Project Structure
 
