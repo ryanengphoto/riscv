@@ -201,7 +201,7 @@ riscv/
 │   ├── sim/                 # Simulation files
 │   │   ├── tb_riscv.sv      # Main testbench
 │   │   └── tests/           # Test cases
-│   ├── config.tcl           # OpenLane configuration
+│   ├── config.json          # LibreLane configuration
 │   └── Makefile             # Build system
 ├── fpga/                    # FPGA implementation
 └── README.md                # This file
