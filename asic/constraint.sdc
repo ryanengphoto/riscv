@@ -67,13 +67,20 @@ set_load 0.05 [all_outputs]
 # Design Rule Constraints
 # -----------------------------------------------------------------------------
 # Maximum transition time
-set_max_transition 0.75 [current_design]
+# Lower value forces better buffer insertion for high-fanout nets
+set_max_transition 0.5 [current_design]
 
 # Maximum capacitance
 set_max_capacitance 0.2 [current_design]
 
 # Maximum fanout
-set_max_fanout 6 [current_design]
+# Note: Lower value forces better buffer tree synthesis
+# Current worst case: 52 loads on as_ex_alu_operand_b_reg[1]
+set_max_fanout 4 [current_design]
+
+# Additional fanout constraints for high-fanout pipeline registers
+# These will be applied during synthesis to force buffer tree insertion
+# Note: These are hints - actual enforcement depends on synthesis tool
 
 # -----------------------------------------------------------------------------
 # Multicycle Paths (if any)
