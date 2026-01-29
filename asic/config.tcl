@@ -28,10 +28,11 @@ set ::env(PL_TARGET_DENSITY) 0.40
 set ::env(FP_PIN_ORDER_CFG) "$::env(DESIGN_DIR)/pin_order.cfg"
 
 # Synthesis settings
-set ::env(SYNTH_STRATEGY) "AREA 0"
+# DELAY strategy prioritizes timing over area - better for high-fanout nets
+set ::env(SYNTH_STRATEGY) "DELAY 3"
 set ::env(SYNTH_READ_BLACKBOX_LIB) 1
 set ::env(SYNTH_NO_FLAT) 0
-set ::env(SYNTH_MAX_FANOUT) 6
+set ::env(SYNTH_MAX_FANOUT) 4
 
 # Placement settings
 set ::env(PL_BASIC_PLACEMENT) 0
@@ -62,5 +63,5 @@ set ::env(GRT_ANTENNA_MARGIN) 5
 set ::env(CTS_CLK_BUFFER_LIST) "sky130_fd_sc_hd__clkbuf_4 sky130_fd_sc_hd__clkbuf_8"
 set ::env(CTS_SINK_CLUSTERING_SIZE) 16
 set ::env(CTS_SINK_CLUSTERING_MAX_DIAMETER) 50
-set ::env(MAX_FANOUT_CONSTRAINT) 6
+set ::env(MAX_FANOUT_CONSTRAINT) 4
 
