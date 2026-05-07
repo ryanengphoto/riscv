@@ -11,7 +11,7 @@
 #   50 MHz  = 20.0ns
 #   25 MHz  = 40.0ns
 
-create_clock -name clk -period 25.0 [get_ports clk]
+create_clock -name clk -period 10.0 [get_ports clk]
 
 # Clock uncertainty (jitter + skew margin)
 set_clock_uncertainty 0.25 [get_clocks clk]

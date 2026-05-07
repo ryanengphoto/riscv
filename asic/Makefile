@@ -5,14 +5,15 @@
 DESIGN_NAME := riscv_cpu
 PDK ?= sky130A
 PDK_ROOT ?= $(HOME)/.volare
+DOCKER_PDK_ROOT ?= /opt/volare
 
 # OpenLane paths
 OPENLANE_ROOT ?= $(HOME)/OpenLane
 OPENLANE_TAG := $(shell date +%Y%m%d_%H%M%S)
 
 # Docker settings
-DOCKER_IMAGE := efabless/openlane:latest
-DOCKER_OPTIONS := --rm -v $(PWD):/work -v $(PDK_ROOT):$(PDK_ROOT) -e PDK_ROOT=$(PDK_ROOT) -w /work
+DOCKER_IMAGE ?= librelane-env:latest
+DOCKER_OPTIONS := --rm -v $(PWD):/workspace -e PDK_ROOT=$(DOCKER_PDK_ROOT) -e PDK=$(PDK) -w /workspace
 
 # Simulation settings
 SIM_TOP := tb_riscv
@@ -38,12 +39,14 @@ help:
 	@echo "  make clean       - Remove build artifacts"
 	@echo ""
 	@echo "Docker targets:"
-	@echo "  make docker-harden      - Run flow in Docker"
-	@echo "  make docker-interactive - Interactive mode in Docker"
+	@echo "  make docker-harden      - Run full LibreLane flow in Docker"
+	@echo "  make docker-interactive - Open a shell in the Docker flow env"
 	@echo ""
 	@echo "Configuration:"
 	@echo "  PDK=$(PDK)"
 	@echo "  PDK_ROOT=$(PDK_ROOT)"
+	@echo "  DOCKER_PDK_ROOT=$(DOCKER_PDK_ROOT)"
+	@echo "  DOCKER_IMAGE=$(DOCKER_IMAGE)"
 
 # =============================================================================
 # OpenLane Flow (Native)
@@ -66,14 +69,14 @@ interactive:
 # =============================================================================
 
 docker-harden:
-	@echo "Running OpenLane flow in Docker..."
+	@echo "Running LibreLane flow in Docker..."
 	docker run $(DOCKER_OPTIONS) $(DOCKER_IMAGE) \
-		openlane --pdk $(PDK) --pdk-root $(PDK_ROOT) config.json
+		librelane --flow Classic ./config.json
 
 docker-interactive:
-	@echo "Starting OpenLane interactive mode in Docker..."
+	@echo "Opening LibreLane shell in Docker..."
 	docker run -it $(DOCKER_OPTIONS) $(DOCKER_IMAGE) \
-		openlane --pdk $(PDK) --pdk-root $(PDK_ROOT) --interactive config.json
+		bash
 
 docker-shell:
 	@echo "Opening shell in Docker container..."

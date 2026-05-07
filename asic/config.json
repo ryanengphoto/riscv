@@ -15,7 +15,7 @@
     ],
 
     "CLOCK_PORT": "clk",
-    "CLOCK_PERIOD": 25.0,
+    "CLOCK_PERIOD": 10,
     "CLOCK_NET": "clk",
     "PL_RESIZER_BUFFER_INPUTS": true,
     "PL_RESIZER_BUFFER_OUTPUTS": true,
@@ -64,12 +64,12 @@
         "CTS_ROOT_BUFFER": "sky130_fd_sc_hd__clkbuf_16",
         "CTS_MAX_CAP": 0.5,
         "//": "Rest of your PDK settings...",
-        "CLOCK_PERIOD": 25.0,
+        "CLOCK_PERIOD": 10,
         "FP_CORE_UTIL": 40
     },
 
     "pdk::gf180*": {
-        "CLOCK_PERIOD": 25.0,
+        "CLOCK_PERIOD": 10,
         "FP_CORE_UTIL": 35
     }
 }

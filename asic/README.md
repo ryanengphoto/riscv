@@ -28,6 +28,8 @@ asic/
 
 ## Prerequisites
 
+> **Recommended workflow:** build and harden the processor using the Docker container environment (LibreLane/OpenLane image) rather than a host-local PDK install. This keeps tool and PDK versions reproducible and avoids duplicate local PDK storage.
+
 ### 1. Install OpenLane 2.0+
 
 ```bash
@@ -128,6 +130,19 @@ librelane --flow Classic ./config.json
 
 # View metrics after run
 cat runs/<RUN_TAG>/final/metrics.json
+```
+
+### Running with the project Docker container (recommended)
+
+Use the checked-in `asic/Dockerfile`, which pre-installs LibreLane and the Sky130 PDK in-container (`/opt/volare`), so no host `~/.volare` is required.
+
+```bash
+# From repo root, build the environment image
+docker build -t librelane-env -f asic/Dockerfile asic
+
+# Run the full processor hardening flow
+cd asic
+make docker-harden
 ```
 
 ### Simulation (pre-synthesis verification)
